@@ -4,851 +4,374 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ISD Model for Online Learning</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root {
-  --dark: #1a2b3c;
-  --cyan: #40d9c6;
-  --cyan-fill: #40d9c6;
-  --bg: #ffffff;
-  --text: #1a2b3c;
-  --text-light: #6b7d8e;
-  --white: #ffffff;
-  --shadow: rgba(26,43,60,0.15);
-  --gate-bg: #fff;
-  --gate-border: #1a2b3c;
-}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+body{font-family:'Inter',system-ui,sans-serif;background:#fff;color:#000;min-height:100vh;}
+
+.app{max-width:1100px;margin:0 auto;border:1px solid #aaa;border-radius:12px;overflow:hidden;background:#fff;}
 
 /* ── HEADER ── */
-.header{background:var(--dark);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 8px var(--shadow);z-index:100;flex-shrink:0;}
-.header h1{font-size:17px;font-weight:600;letter-spacing:-.3px;}
-.header .sub{font-size:11px;color:var(--cyan);opacity:.85;}
+.hdr{padding:22px 28px 18px;border-bottom:2px solid #000;display:flex;align-items:flex-end;justify-content:space-between;}
+.hdr h1{font-size:18px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#000;}
+.hdr .sub{font-size:9px;font-weight:600;color:#079EB1;letter-spacing:1px;}
 
-/* ── PHASE NAV ── */
-.phase-nav{display:flex;gap:4px;padding:8px 24px;background:#f8fafb;border-bottom:1px solid #e8ecf0;flex-shrink:0;overflow-x:auto;}
-.phase-btn{padding:5px 13px;border:none;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;background:#edf2f7;color:var(--text-light);text-transform:uppercase;letter-spacing:.6px;}
-.phase-btn:hover{background:#d5f5f0;color:var(--dark);}
-.phase-btn.active{background:var(--cyan);color:var(--dark);}
+/* ── GLASS STAT TILES ── */
+.stats{display:flex;border-bottom:1px solid #dadada;}
+.stat{flex:1;padding:20px 16px;text-align:center;background:rgba(1,59,70,.04);border-right:1px solid rgba(1,59,70,.08);}
+.stat:last-child{border-right:none;}
+.stat:hover{background:rgba(7,158,177,.08);}
+.stat .sv{font-size:34px;font-weight:900;color:#000;line-height:1;letter-spacing:-1px;}
+.stat .sl{font-size:8px;font-weight:800;color:#079EB1;text-transform:uppercase;letter-spacing:2px;margin-top:6px;}
 
-/* ── FLOWCHART WRAPPER ── */
-.flow-wrap{flex:1;overflow:auto;position:relative;}
-.flow-scroll{display:inline-flex;flex-direction:column;min-width:100%;padding:10px 50px 30px 30px;}
+/* ── GLASS PHASE TABS ── */
+.tabs{display:flex;border-bottom:1px solid #dadada;}
+.tab{flex:1;padding:13px 6px;font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;color:#777;text-align:center;transition:all .2s;background:rgba(1,59,70,.03);border-right:1px solid rgba(1,59,70,.06);}
+.tab:last-child{border-right:none;}
+.tab:hover{color:#000;background:rgba(7,158,177,.08);}
+.tab.active{color:#013B46;background:rgba(7,158,177,.1);}
+.tab.active::after{content:'';display:block;width:24px;height:2px;background:#079EB1;margin:6px auto 0;}
+.tab .tn{display:block;font-size:7px;color:#079EB1;letter-spacing:1px;margin-bottom:2px;}
 
-/* ── PHASE HEADER ROW ── */
-.phase-header-row{display:flex;align-items:center;min-width:max-content;margin-bottom:4px;padding-left:0;}
-.phase-header-cell{display:flex;align-items:center;flex-shrink:0;}
-.phase-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.8px;color:var(--text-light);white-space:nowrap;padding:0 8px 0 0;}
-.phase-dash{flex:1;height:0;border-bottom:2px dashed #cbd5e0;min-width:12px;}
+/* ── BODY ── */
+.body{display:flex;min-height:500px;}
+.list{flex:1;overflow-y:auto;max-height:600px;padding:6px;}
+.sidebar{width:0;overflow:hidden;transition:width .3s cubic-bezier(.4,0,.2,1);background:#f3f4f6;border-left:1px solid #bbb;}
+.sidebar.open{width:380px;}
+.sb-inner{width:380px;padding:20px;overflow-y:auto;max-height:600px;}
 
-/* ── 3-ROW FLOW GRID ── */
-.flow-grid{display:flex;min-width:max-content;align-items:stretch;}
+/* ── RTE BANNER ── */
+.rte-banner{display:flex;align-items:center;gap:10px;padding:10px 16px;margin:4px 6px;background:rgba(7,158,177,.07);border:1px dashed rgba(7,158,177,.4);border-radius:6px;}
+.rte-icon{width:28px;height:28px;background:#079EB1;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;}
+.rte-icon svg{width:14px;height:14px;}
+.rte-text{flex:1;}
+.rte-title{font-size:10px;font-weight:800;color:#079EB1;text-transform:uppercase;letter-spacing:1px;}
+.rte-desc{font-size:9px;color:#555;line-height:1.4;margin-top:2px;}
 
-.col{display:flex;flex-direction:column;align-items:center;flex-shrink:0;position:relative;}
-.col .above{min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:6px;position:relative;}
-.col .main{min-height:80px;display:flex;align-items:center;justify-content:center;position:relative;}
-.col .below{min-height:100px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:6px;position:relative;}
+/* ── LIST CARDS ── */
+.card{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border-radius:8px;cursor:pointer;transition:all .15s;margin-bottom:2px;border:1px solid transparent;}
+.card:hover{background:#f0f6f7;border-color:#aaa;}
+.card.sel{background:#eef7f8;border-color:#079EB1;}
+.num{width:30px;height:30px;background:#000;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.card.sel .num{background:#079EB1;}
+.ic{width:26px;height:26px;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.info{flex:1;min-width:0;}
+.nm{font-size:13px;font-weight:700;color:#000;line-height:1.3;letter-spacing:.2px;}
+.ds{font-size:10px;color:#555;line-height:1.4;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.tgs{margin-top:5px;display:flex;gap:4px;flex-wrap:wrap;}
+.tg{font-size:7px;font-weight:800;padding:2px 8px;letter-spacing:1.2px;text-transform:uppercase;}
+.tg.process{color:#555;border:1px solid #aaa;}
+.tg.milestone{color:#079EB1;border:1px solid rgba(7,158,177,.3);}
+.tg.gate{color:#000;border:1px solid rgba(0,0,0,.2);background:rgba(0,0,0,.03);}
+.tg.dt{color:#079EB1;border:1px solid rgba(7,158,177,.2);}
+.tg.meeting{color:#013B46;border:1px solid rgba(1,59,70,.3);background:rgba(1,59,70,.05);}
+.tg.signoff{color:#013B46;border:1px solid rgba(1,59,70,.3);background:rgba(1,59,70,.05);}
+.arr{color:#999;font-size:18px;align-self:center;transition:color .15s;}
+.card:hover .arr{color:#079EB1;}
 
-/* Fixed-width arrow columns for even spacing */
-.col-arrow{width:36px;overflow:visible;}
-.col-arrow .above{overflow:visible;}
-.col-arrow .main{width:36px;}
-/* Wider arrow at phase boundaries — line still reaches both nodes */
-.col-arrow-brk{width:56px;}
-.col-arrow-brk .main{width:56px;}
-/* Phase break spacing only — no visible separator line */
-/* Wider arrow for decision YES/NO labels */
-.col-arrow-wide{width:50px;}
-.col-arrow-wide .main{width:50px;}
+/* ── SIDEBAR ── */
+.sb-x{background:#fff;border:1px solid #aaa;width:28px;height:28px;font-size:13px;cursor:pointer;color:#555;float:right;display:flex;align-items:center;justify-content:center;}
+.sb-x:hover{border-color:#079EB1;color:#000;}
+.sb-phase{font-size:8px;font-weight:800;color:#079EB1;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:6px;}
+.sb-title{font-size:16px;font-weight:900;color:#000;letter-spacing:.2px;line-height:1.3;padding-right:40px;margin-bottom:6px;}
+.sb-rule{width:40px;height:2px;background:#079EB1;margin-bottom:10px;}
+.sb-desc{font-size:11px;color:#333;line-height:1.6;margin-bottom:14px;}
 
-/* ── NODE SHAPES ── */
-.node{cursor:pointer;transition:transform .15s,box-shadow .15s,filter .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;text-align:center;z-index:2;position:relative;}
-.node:hover{transform:scale(1.06);z-index:10;}
-.node.sel{z-index:10;}
+.sb-section{margin-bottom:16px;}
+.sb-label{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#013B46;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid #ccc;}
+.sb-list{list-style:none;padding:0;counter-reset:sbc;}
+.sb-list li{font-size:11px;color:#333;line-height:1.55;padding:3px 0 3px 24px;counter-increment:sbc;position:relative;}
+.sb-list li::before{content:counter(sbc,decimal-leading-zero);position:absolute;left:0;color:#079EB1;font-size:9px;font-weight:800;}
 
-/* Dark rectangle (black bg, cyan text) */
-.n-dark{width:115px;height:78px;background:var(--dark);color:var(--cyan);border-radius:5px;padding:7px 9px;font-size:10px;font-weight:500;line-height:1.28;box-shadow:0 2px 8px rgba(26,43,60,.28);}
-.n-dark:hover{box-shadow:0 5px 16px rgba(26,43,60,.38);}
-.n-dark.sel{box-shadow:0 0 0 3px var(--cyan),0 5px 16px rgba(26,43,60,.38);}
+.sb-tool{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;font-size:10px;font-weight:600;color:#079EB1;border:1px solid rgba(7,158,177,.4);margin:2px 4px 2px 0;text-decoration:none;transition:all .12s;cursor:pointer;}
+.sb-tool:hover{background:rgba(7,158,177,.06);border-color:#079EB1;}
+.sb-tool svg{width:10px;height:10px;}
+.sb-tool-nolink{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;font-size:10px;font-weight:600;color:#333;border:1px solid #aaa;margin:2px 4px 2px 0;}
 
-/* Shield shape (cyan bg, black text, pointed bottom) — same height as rectangles */
-.n-shield{width:115px;height:78px;background:var(--cyan);color:var(--dark);clip-path:polygon(2% 0%,98% 0%,100% 4%,100% 65%,50% 100%,0% 65%,0% 4%);padding:0 10px 22px;font-size:10px;font-weight:600;line-height:1.28;display:flex;align-items:center;justify-content:center;text-align:center;filter:drop-shadow(0 2px 6px rgba(64,217,198,.35));cursor:pointer;transition:transform .15s,filter .15s;}
-.n-shield:hover{transform:scale(1.06);filter:drop-shadow(0 4px 12px rgba(64,217,198,.5));z-index:10;}
-.n-shield.sel{filter:drop-shadow(0 0 4px var(--dark)) drop-shadow(0 0 8px rgba(64,217,198,.6));}
+.sb-del{display:inline-block;background:#fff;border:1px solid #aaa;color:#013B46;padding:4px 12px;font-size:10px;font-weight:600;margin:2px 4px 2px 0;}
 
-/* Decision diamond */
-.n-diamond-wrap{position:relative;width:90px;height:90px;display:flex;align-items:center;justify-content:center;overflow:visible;}
-.n-diamond{width:68px;height:68px;background:var(--white);border:2.5px solid var(--dark);transform:rotate(45deg);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,box-shadow .15s;box-shadow:0 2px 8px var(--shadow);}
-.n-diamond:hover{border-color:var(--cyan);box-shadow:0 4px 14px var(--shadow);}
-.n-diamond.sel{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan);}
-.n-diamond .d-text{transform:rotate(-45deg);font-size:7px;font-weight:600;line-height:1.15;color:var(--dark);padding:2px;text-align:center;}
+/* ── ACCORDION ── */
+.acc-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:6px 0;border-bottom:1px solid #ccc;margin-bottom:6px;}
+.acc-toggle .sb-label{margin:0;padding:0;border:none;cursor:pointer;}
+.acc-chevron{font-size:12px;color:#079EB1;transition:transform .2s;font-weight:700;}
+.acc-chevron.open{transform:rotate(180deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s;}
+.acc-body.open{max-height:3000px;}
 
-/* Gate circles (Review, Test, and Evaluate) — non-interactive visual markers */
-.n-gate{width:50px;height:50px;background:var(--gate-bg);border:2.5px solid var(--gate-border);border-radius:50%;font-size:7px;font-weight:700;line-height:1.15;padding:5px;color:var(--dark);box-shadow:0 2px 6px var(--shadow);display:flex;align-items:center;justify-content:center;text-align:center;cursor:default;}
+/* ── AI PROMPT CARDS ── */
+.ai-card{background:#f5f6f7;border:1px solid #ccc;border-radius:6px;padding:12px;margin-bottom:8px;position:relative;}
+.ai-card:hover{border-color:#079EB1;}
+.ai-ref{font-size:10px;font-weight:800;color:#000;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.ai-ref::before{content:'';display:inline-block;width:6px;height:6px;background:#079EB1;}
+.ai-prompt{font-size:10.5px;color:#333;line-height:1.6;white-space:pre-wrap;word-wrap:break-word;}
+.ai-prompt .placeholder{color:#079EB1;font-weight:600;}
+.ai-copy{position:absolute;top:8px;right:8px;background:#fff;border:1px solid #dadada;font-size:9px;font-weight:700;color:#555;padding:2px 8px;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;}
+.ai-copy:hover{border-color:#079EB1;color:#079EB1;}
+.ai-copy.copied{color:#079EB1;border-color:#079EB1;}
 
-/* Dashed offshoot */
-.n-dashed{width:105px;height:60px;background:#fff;border:2px dashed var(--text-light);border-radius:5px;padding:6px 8px;font-size:9px;font-weight:500;line-height:1.2;color:var(--text-light);display:flex;align-items:center;justify-content:center;text-align:center;}
-.n-dashed:hover{border-color:var(--dark);color:var(--dark);}
-.n-dashed.sel{border-color:var(--cyan);color:var(--dark);}
-
-/* Star (Launch Training) */
-.n-star-wrap{width:105px;height:105px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;margin:0 5px;}
-.star-bg{width:105px;height:105px;background:var(--cyan);clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);position:absolute;transition:transform .15s;}
-.n-star-wrap:hover .star-bg{transform:scale(1.08);}
-.n-star-wrap.sel .star-bg{transform:scale(1.1);filter:drop-shadow(0 0 8px rgba(64,217,198,.6));}
-.star-text{position:relative;z-index:1;font-size:9px;font-weight:700;color:var(--dark);line-height:1.15;text-align:center;max-width:60px;}
-
-/* ── CONNECTORS ── */
-.arrow{display:flex;align-items:center;position:relative;width:100%;height:2px;}
-.arrow .line{position:absolute;left:-8px;right:-8px;height:2px;background:var(--dark);}
-.arrow .line::after{content:'';position:absolute;right:0;top:-4px;border-left:6px solid var(--dark);border-top:4.5px solid transparent;border-bottom:4.5px solid transparent;}
-.arrow-label{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:800;color:var(--cyan);white-space:nowrap;}
-
-/* Vertical connectors */
-.v-line{width:2px;background:var(--dark);flex-shrink:0;}
-.v-line-down{width:2px;height:14px;background:var(--dark);}
-.v-arrow-down{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--dark);}
-
-/* Branch NO connector */
-.branch-no-line{width:2px;height:16px;background:var(--dark);}
-.branch-no-label{font-size:9px;font-weight:800;color:var(--text-light);margin-top:2px;}
-
-/* (phase separators are now built into phase-break arrow columns) */
-
-/* ── DETAIL PANEL ── */
-.overlay{position:fixed;inset:0;background:rgba(26,43,60,.25);z-index:500;opacity:0;pointer-events:none;transition:opacity .25s;}
-.overlay.open{opacity:1;pointer-events:auto;}
-.panel{position:fixed;right:-520px;top:0;bottom:0;width:500px;max-width:92vw;background:#fff;box-shadow:-4px 0 20px rgba(26,43,60,.12);z-index:600;transition:right .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
-.panel.open{right:0;}
-.panel-head{padding:20px 24px;border-bottom:1px solid #e8ecf0;flex-shrink:0;position:relative;}
-.panel-badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;}
-.panel-title{font-size:19px;font-weight:700;line-height:1.3;color:var(--dark);padding-right:40px;}
-.panel-x{position:absolute;top:14px;right:14px;width:30px;height:30px;border:none;background:#edf2f7;border-radius:50%;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-light);}
-.panel-x:hover{background:#e2e8f0;}
-.panel-body{flex:1;overflow-y:auto;padding:20px 24px;}
-.p-sec{margin-bottom:22px;}
-.p-sec:last-child{margin-bottom:0;}
-.p-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--text-light);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
-.p-label .ic{font-size:13px;}
-.p-text{font-size:13.5px;line-height:1.6;color:var(--text);}
-.p-list{list-style:none;padding:0;}
-.p-list li{padding:5px 0;font-size:12.5px;line-height:1.45;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;gap:7px;}
-.p-list li:last-child{border-bottom:none;}
-.p-list li::before{content:attr(data-ic);flex-shrink:0;width:18px;text-align:center;font-size:12px;}
-.del-tag{display:inline-block;padding:3px 9px;background:#e6faf7;border-radius:4px;font-size:11.5px;font-weight:500;color:var(--dark);margin:2px 3px 2px 0;}
-.prompt-card{background:#f8fafb;border:1px solid #e2e8f0;border-radius:7px;padding:10px 12px;margin-bottom:7px;font-size:12.5px;line-height:1.5;cursor:pointer;transition:border-color .15s;position:relative;}
-.prompt-card:hover{border-color:var(--cyan);}
-.prompt-card .copy-hint{font-size:9px;color:var(--text-light);margin-top:5px;}
-.prompt-card.copied{border-color:var(--cyan);}
-.prompt-card.copied .copy-hint{color:var(--cyan);}
-
-/* Tooltip */
-.tip{position:fixed;background:var(--dark);color:#fff;padding:5px 10px;border-radius:4px;font-size:10.5px;pointer-events:none;z-index:200;opacity:0;transition:opacity .12s;max-width:200px;white-space:nowrap;text-align:center;}
-.tip.show{opacity:1;}
-
-/* Scrollbar */
-.flow-wrap::-webkit-scrollbar{height:8px;width:8px;}
-.flow-wrap::-webkit-scrollbar-track{background:#edf2f7;border-radius:4px;}
-.flow-wrap::-webkit-scrollbar-thumb{background:#cbd5e0;border-radius:4px;}
-.panel-body::-webkit-scrollbar{width:5px;}
-.panel-body::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:3px;}
-
-@media(max-width:768px){.panel{width:100vw;max-width:100vw;}}
+/* ── SCROLLBARS ── */
+.list::-webkit-scrollbar,.sb-inner::-webkit-scrollbar{width:4px;}
+.list::-webkit-scrollbar-thumb,.sb-inner::-webkit-scrollbar-thumb{background:#bbb;border-radius:2px;}
 </style>
 </head>
 <body>
-<div class="header"><div><h1>ISD Model for Online Learning</h1><div class="sub">Click any milestone to view details, tools, deliverables &amp; AI prompts</div></div></div>
-<div class="phase-nav" id="phaseNav"></div>
-<div class="flow-wrap" id="flowWrap">
-  <div class="flow-scroll" id="flowScroll">
-    <div class="phase-header-row" id="phaseHeaders"></div>
-    <div class="flow-grid" id="flowGrid"></div>
-  </div>
+<div class="app">
+<div class="hdr">
+  <div><h1>ISD Model for Online Learning</h1><div class="sub">Click any milestone to view details, tools, deliverables &amp; AI prompts</div></div>
 </div>
-<div class="overlay" id="overlay"></div>
-<div class="panel" id="panel">
-  <div class="panel-head"><div class="panel-badge" id="pBadge"></div><div class="panel-title" id="pTitle"></div><button class="panel-x" id="pClose">&times;</button></div>
-  <div class="panel-body" id="pBody"></div>
+<div class="stats" id="stats"></div>
+<div class="tabs" id="tabs"></div>
+<div class="body">
+  <div class="list" id="list"></div>
+  <div class="sidebar" id="sb"><div class="sb-inner" id="sbi"></div></div>
 </div>
-<div class="tip" id="tip"></div>
+</div>
 
 <script>
-// ───────── PHASE DEFINITIONS ─────────
-const PHASES = [
-  {id:'discovery',name:'Discovery',color:'#40d9c6'},
-  {id:'analysis',name:'Analysis',color:'#33c4b3'},
-  {id:'design',name:'Design',color:'#28b0a2'},
-  {id:'development',name:'Development',color:'#1e9c91'},
-  {id:'implementation',name:'Implementation',color:'#158880'},
-  {id:'evaluation',name:'Evaluation',color:'#0d7470'},
-  {id:'close',name:'Project Close',color:'#076060'}
-];
-const PC = {}; PHASES.forEach(p=>PC[p.id]=p.color);
-
-// ───────── MILESTONE DATA ─────────
-const M = {
-'intake':{name:'Business Problem or Intake Submission',phase:'discovery',
-  desc:'The entry point of every ISD project. A stakeholder submits a request identifying a business problem, performance gap, or learning need, triggering the formal project pipeline.',
-  sub:['Receive and log the intake request','Conduct initial screening for completeness','Acknowledge receipt and set expectations'],
-  tools:[],resources:[],
-  del:[],
-  ai:[]},
-
-'kickoff':{name:'Kick-off Meeting',phase:'discovery',
-  desc:'A structured meeting with stakeholders and SMEs to align on project scope, goals, constraints, timelines, and success criteria. Establishes the foundation for the project and builds early stakeholder buy-in.',
-  sub:['Prepare and distribute meeting agenda','Identify and invite all key stakeholders and SMEs','Clarify business objectives and success criteria','Document decisions, action items, and open questions','Establish communication cadence and project governance'],
-  tools:[{n:'Kick-Off Meeting Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQA1AFS-f1tCR7-GuEOtQNmSAfY36hqt6q6ZOfzIZ3xUsYg?e=EzjC7v'}],resources:[],
-  del:['Kick-off Meeting Agenda','Project Summary'],
-  ai:['Create an agenda for an instructional design project kick-off meeting. The project is: [describe]. Include time allocations, discussion prompts, and a section for identifying risks.','Based on these kick-off notes, draft a summary email with key decisions, action items, and next steps: [paste notes]']},
-
-'review-content':{name:'Review Existing Content + Research',phase:'discovery',
-  desc:'Audit and evaluate all existing training materials, documentation, and research. Prevents duplication, identifies reusable assets, and reveals gaps in current learning content.',
-  sub:['Gather all existing training materials','Evaluate quality, accuracy, and relevance','Identify reusable assets vs. content needing updates','Research industry best practices','Document findings and content inventory'],
-  tools:[{n:'Miro Mind Mapping'}],resources:[],
-  del:['Content inventory spreadsheet','Gap analysis summary','Reusable asset list'],
-  ai:['Create a content audit template for evaluating existing training materials. Include columns for: asset name, format, date, topic, quality rating (1-5), relevance, reuse recommendation, and notes.','Analyze this existing course outline and identify content gaps, outdated information, and improvable sections: [paste outline]']},
-
-'stakeholder-map':{name:'Map the Stakeholder / SME Landscape',phase:'discovery',
-  desc:'Identify and map all stakeholders, SMEs, and decision-makers. Understanding influence and expertise ensures the right people are engaged at the right times throughout the project.',
-  sub:['Identify all stakeholders by role and influence','Map SMEs by domain expertise and availability','Define RACI chart','Establish communication preferences','Plan SME engagement schedule'],
-  tools:[],resources:[],
-  del:['Stakeholder map','RACI chart','SME engagement plan'],
-  ai:['Create a stakeholder analysis matrix. My stakeholders include: [list]. Generate a RACI chart and recommend engagement strategies for each.','Draft an introductory email to an SME requesting participation in a training project on [topic].']},
-
-'performance-analysis':{name:'Performance Analysis',phase:'discovery',
-  desc:'Systematic investigation to determine whether the business problem can be addressed through training or requires a non-training solution (process change, tools, incentives). This is the critical go/no-go gate.',
-  sub:['Define desired vs. current performance state','Identify root causes of the performance gap','Determine knowledge/skill gap vs. environmental issue','Assess organizational readiness','Document findings and recommendation'],
-  tools:[{n:'Performance Analysis Template'}],resources:[],
-  del:['Performance Analysis Report','Training vs. non-training recommendation'],
-  ai:['Conduct a root cause analysis for this performance gap: [describe]. Use categories: knowledge/skills, motivation, environment/tools, incentives, capacity. Provide diagnostic questions for each.','Based on this analysis data, draft a recommendation on whether training is appropriate: [paste data]']},
-
-'decision':{name:'RESULTS: Can this problem be solved with training?',phase:'analysis',
-  desc:'The critical decision gate based on performance analysis findings. If the root cause is a knowledge or skill gap, the project continues. If environmental, procedural, or motivational, a non-training solution is proposed.',
-  sub:['Review performance analysis findings','Consult with stakeholders on recommendation','Document the decision rationale','If YES: proceed to Needs Assessment and Analysis','If NO: propose alternative solution and close project'],
-  tools:[{n:'Training Proposal Template'}],resources:[],
-  del:['Training Proposal'],
-  ai:[]},
-
-'non-training':{name:'Propose Non-Training Solution + End Project',phase:'analysis',
-  desc:'When analysis reveals the problem is not a training issue, propose alternative solutions such as process improvements, job aids, environmental changes, or management interventions. The project formally closes.',
-  sub:['Document why training is not appropriate','Research and propose alternative interventions','Present recommendation to stakeholders','Close out the project formally'],
-  tools:[],resources:[],
-  del:['Non-Training Solution Proposal','Project closure email message'],
-  ai:['The analysis reveals this is not a training issue. Root causes: [list]. Draft a proposal for non-training interventions including job aids, process changes, and management actions.']},
-
-'needs-assessment':{name:'Needs Assessment',phase:'analysis',
-  desc:'The Needs Assessment encompasses three core analysis activities that together ensure the training solution is grounded in a thorough understanding of the performance gap, the target audience, and the job requirements.',
-  sub:['<strong>Assess Needs and Conduct Instructional Analysis</strong> — Decompose the learning need into component parts: conduct a goals analysis, perform subordinate skills analysis, identify entry-level skills and prerequisites, analyze instructional and performance contexts, and document findings.','<strong>Analyze Learners and Contexts</strong> — Profile the target audience and analyze the learning context (where training occurs) and performance context (where skills are applied): define demographics and prior knowledge, assess motivations and preferences, analyze both environments, and identify barriers to transfer.','<strong>Conduct Job/Skills Analysis</strong> — Systematically analyze the target job role: interview SMEs and high performers, observe task performance, document task sequences and decision points, identify critical vs. nice-to-have skills, and validate with multiple SMEs.'],
-  tools:[{n:'Needs Assessment Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQB1wXdXDEHWQofTD9carV0RATf0TjlAjI1V6Gs3q8M8yb8?e=FwCGHx'},{n:'Job Analysis Template',link:'https://1drv.ms/x/c/cc839e3a35a19644/IQAARWg8dteUQ6UbkXgur40tAc7GBBmZlDEeXIuOfkhc-a8?e=0ggG1v'}],resources:[],
-  del:['Needs Assessment (completed in full)'],
-  ai:['Complete the attached Needs Assessment Template covering instructional analysis, learner analysis, and job/task analysis for a training project on [topic]. For each analysis, define the approach, data collection methods, and expected outputs.','Conduct a subordinate skills analysis for this goal: [state goal]. Break it into all knowledge and skills organized hierarchically.','Create a learner analysis profile for: [describe audience]. Include prior knowledge, preferences, tech comfort, motivations, and barriers.','Create a task analysis for the role of [job title]. Break down responsibilities into discrete tasks with knowledge, skills, and tools required.']},
-
-'assess-needs':{name:'Assess Needs and Conduct Instructional Analysis',phase:'analysis',
-  desc:'The core analysis activity that decomposes the learning need into component parts — what learners need to know and do, the instructional context, and the most effective instructional approach.',
-  sub:['Conduct a goals analysis','Perform subordinate skills analysis','Identify entry-level skills and prerequisites','Analyze instructional and performance contexts','Document instructional analysis findings'],
-  tools:[{n:'Front-End Analysis'}],resources:[{n:'How to Perform a Goals Analysis'}],
-  del:['Instructional analysis document','Skills hierarchy diagram','Entry behaviors list'],
-  ai:['Conduct a subordinate skills analysis for this goal: [state goal]. Break it into all knowledge and skills organized hierarchically.','Identify prerequisite knowledge for training on [topic]. Audience: [describe].']},
-
-'identify-goals':{name:'Identify Instructional Goal(s)',phase:'analysis',
-  desc:'Translate business objectives and performance gaps into clear, measurable instructional goals that define what learners will be able to do after training. These goals drive all subsequent design decisions.',
-  sub:['Review performance analysis and business objectives','Draft instructional goal statements','Validate goals with stakeholders and SMEs','Ensure goals are measurable and observable'],
-  tools:[{n:'Needs Assessment Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQB1wXdXDEHWQofTD9carV0RATf0TjlAjI1V6Gs3q8M8yb8?e=FwCGHx'}],resources:[],
-  del:['Needs Assessment (partially complete)'],
-  ai:['Convert these business objectives into measurable instructional goals: [list]. Each should describe what the learner will do, under what conditions, and to what standard.','Review these instructional goals for clarity and alignment: [paste goals]']},
-
-'job-analysis':{name:'Conduct Job/Skills Analysis',phase:'analysis',
-  desc:'Systematically analyze the target job role to identify specific skills, knowledge, and competencies required for successful performance. Ensures training addresses real job requirements.',
-  sub:['Interview SMEs and high performers','Observe workers performing target tasks','Document task sequences, decisions, knowledge','Identify critical vs. nice-to-have skills','Validate analysis with multiple SMEs'],
-  tools:[{n:'Job Analysis Template'}],resources:[{n:'How to Conduct a Job Analysis'}],
-  del:['Job/task analysis document','Skills inventory','Task-to-skill mapping'],
-  ai:['Create a task analysis for the role of [job title]. Break down responsibilities into discrete tasks with knowledge, skills, and tools required.','From these SME notes about [role], identify critical skills to prioritize in training: [paste notes]']},
-
-'analyze-learners':{name:'Analyze Learners and Contexts',phase:'analysis',
-  desc:'Profile the target audience and analyze both the learning context (where training occurs) and performance context (where skills are applied). Understanding learners\' characteristics shapes every design decision.',
-  sub:['Define learner demographics and prior knowledge','Assess attitudes, motivations, learning preferences','Analyze learning environment (tech, time, location)','Analyze performance environment (support, tools, culture)','Identify barriers to learning transfer'],
-  tools:[],resources:[{n:'How to Design #context analysis'},{n:'How to Design #learner analysis'}],
-  del:['Learner profile document','Learning context analysis','Performance context analysis'],
-  ai:['Create a learner analysis profile for: [describe audience]. Include prior knowledge, preferences, tech comfort, motivations, and barriers.','Analyze learning and performance contexts. Training via [modality], applied in [work context]. Identify design implications.']},
-
-'write-objectives':{name:'Write Learning and Terminal Objectives',phase:'design',
-  desc:'Transform instructional goals into specific, measurable learning objectives (enabling) and terminal objectives. Well-written objectives drive assessment design, content selection, and instructional strategy.',
-  sub:['Write terminal objective','Decompose into learning objectives','Use ABCD format (Audience, Behavior, Condition, Degree)','Align to Bloom\'s Taxonomy levels','Review with SMEs for accuracy'],
-  tools:[],resources:[],
-  del:['Terminal objective','Learning objectives list','Objectives-to-goals alignment map'],
-  ai:['Write learning objectives for [topic]. Terminal objective: [state]. Use Bloom\'s and ABCD format. Generate both terminal and enabling objectives.','Review these objectives for measurability and Bloom\'s level: [paste]. Suggest improvements.']},
-
-'training-proposal':{name:'Training Proposal',phase:'design',
-  desc:'Formal document presenting the recommended training solution for stakeholder approval. Includes scope, objectives, delivery method, timeline, budget, and resources. Often the funding gate.',
-  sub:['Compile analysis into proposal narrative','Define delivery modality and approach','Develop budget estimate and resource plan','Create preliminary timeline','Present to stakeholders for approval'],
-  tools:[{n:'Training Proposal Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQCebEEhGdHpTqIOl9Go47Z2AcuMTFJphAwAJIpfLSaqs1w?e=wd3QVX'}],resources:[],
-  del:['Training Proposal'],
-  ai:['Complete the attached Training Proposal for [project]. Include: executive summary, business case, objectives, approach, modality, timeline, budget, success metrics. Details: [provide].','Review this proposal and identify weak areas or potential stakeholder objections: [paste]']},
-
-'project-plan':{name:'Project Plan + Timeline',phase:'design',
-  desc:'Detailed project plan with tasks, milestones, dependencies, resource assignments, and deadlines. Governs execution of remaining ISD phases.',
-  sub:['Estimate duration and effort per task','Identify dependencies and critical path','Assign resources and responsibilities','Create project in Asana'],
-  tools:[{n:'Project Schedule Calculator Claude App'},{n:'Project Plan and Timeline Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQA_cue_KsgoQpWU7HF1oolpAXZmVjU1ursG2YaKK-Vszho?e=IYzBUY'},{n:'Project Dashboard Claude App'}],resources:[],
-  del:['Project Plan and Timeline','Project Dashboard'],
-  ai:['Create a project plan for a [length] eLearning course on [topic]. Include all ISD phases, durations, dependencies, milestones. Launch date: [date].','Review this timeline for risks — underestimated tasks, missing dependencies, bottlenecks: [paste]','Project Dashboard Generator — Copy and paste this prompt into a new Cowork session to generate a stakeholder dashboard for any Asana project.\n\nYou are building a standalone project dashboard app that I can deploy to GitHub Pages. The dashboard pulls live data from my Asana project via a GitHub Action that runs on a schedule, and publishes a static HTML page that stakeholders can view without an Asana login.\n\nStep 1: Gather project information. Before building anything, ask me for the following one step at a time:\n1a. Project name — Search Asana using search_objects or get_projects to find the matching project. Confirm the project name and GID. Then use get_project (with include_sections: true) and get_tasks (with full custom fields, memberships, assignee, and num_subtasks) to understand the structure.\n1b. Brand colors — Primary color (header/accents) and secondary color (highlights/emphasis) as hex codes.\n1c. Project summary — 200-word-max summary of the business problem. Appears at the top of the dashboard.\n1d. Key Dates document — Upload a document with milestones, target dates, and notes. Parse it and build a KEY_DATES JavaScript array.\n1e. Stakeholder & SME Involvement Calendar — Upload a document with dates, stakeholders, required actions, and sign-off gates. Parse it and build a STK_EVENTS array.\n1f. Dashboard owner — Who should be listed as the project owner.\n\nStep 2: Explore the Asana project structure. Gather project GID, status color, all sections with GIDs, and all tasks with these opt_fields: name, due_on, start_on, completed, assignee, assignee.name, custom_fields, custom_fields.name, custom_fields.display_value, custom_fields.type, memberships.section.name, memberships.section.gid, num_subtasks. Map custom fields for Status, Due Date, Start Date, % Done, Estimated Hours, and Actual Hours.\n\nStep 3: Build the GitHub Pages app with this structure: project-dashboard/ with .github/workflows/deploy.yml, scripts/build.js, template.html, package.json, and README.md.\n\ntemplate.html sections: (1) Header with project name, owner, status badge, progress bar, last-updated timestamp. (2) Project Summary card. (3) Stats Row with 5 cards — Total Tasks, Completed, In Progress, Late Starts, Due This Week. (4) What I Need From You — stakeholder table filtered to next 30 days with gate tags. (5) Key Dates — milestone table with status indicators. (6) Project Timeline Gantt — interactive horizontal bar chart grouped by sections, color-coded by status, with progress fill, subtask drill-down, TODAY marker, and hover tooltips. (7) Two-column bottom row: Due This Week and In Progress with Potential Delays subsection.\n\nbuild.js: Fetch project metadata and all tasks with pagination, pre-fetch subtasks, use Asana REST API with ASANA_TOKEN env var, inject data into template.html, output to dist/index.html.\n\ndeploy.yml: Cron every 30 minutes, push to main, workflow_dispatch. Node.js 22. Deploy using GitHub Pages actions.\n\nREADME.md: Beginner-friendly setup instructions including prerequisites, step-by-step repo creation, token generation, GitHub Desktop upload, adding secrets, enabling Pages, triggering builds, and troubleshooting.\n\nStep 4: Save all files to the outputs folder and present them.']},
-
-'develop-assessments':{name:'Develop Assessments',phase:'design',
-  desc:'Design assessment instruments that directly measure learner achievement of each objective. Includes knowledge checks, performance assessments, pre/post tests, and rubrics.',
-  sub:['Create items aligned to each objective','Develop rubrics and scoring criteria','Design formative assessments (knowledge checks)','Design summative assessments (final tests)','Write clear instructions and feedback'],
-  tools:[{n:'Course Design Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQDQM4kZvKQUSZ8lJ7qdHoOpAURMpoTA4e5018Ie7YrBIy8?e=fQ7F0H'}],resources:[],
-  del:['Rubrics and scoring guides (within Course Design)','Pre/post test instruments'],
-  ai:['Create assessment items for these objectives: [list]. For each: 1 scenario-based, 1 multiple-choice, 1 performance task. Include answer keys.','Design a rubric for [task]. Include criteria, 4-point scale, detailed descriptions per level.']},
-
-'design-strategy':{name:'Design Instructional Strategy',phase:'design',
-  desc:'Define the overall instructional approach — sequencing, delivery methods, engagement strategies, practice design, chunking, and pacing. Ensures the experience is pedagogically sound.',
-  sub:['Select strategies aligned with objective types','Define content sequencing and scaffolding','Design practice and feedback mechanisms','Plan engagement and motivation strategies','Determine chunking and pacing for modality'],
-  tools:[{n:'Course Design Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQDQM4kZvKQUSZ8lJ7qdHoOpAURMpoTA4e5018Ie7YrBIy8?e=fQ7F0H'}],resources:[],
-  del:[],
-  ai:['Design an instructional strategy for [topic] for [audience]. Objectives: [list]. Recommend sequencing, practice, engagement, chunking. Justify each.','Suggest three instructional strategy approaches and compare strengths for my audience: [details]']},
-
-'define-metrics':{name:'Define Metrics for Evaluation',phase:'design',
-  desc:'Establish the evaluation framework with specific metrics to measure training effectiveness at multiple Kirkpatrick levels (reaction, learning, behavior, results).',
-  sub:['Define Level 1 (Reaction) metrics','Define Level 2 (Learning) metrics','Define Level 3 (Behavior) metrics','Define Level 4 (Results) metrics','Establish data collection methods per level'],
-  tools:[{n:'Formative Evaluation Plan Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQCF7huxTI-fSIxmzVtWKUwbAdbscBKsV6nh1ZEY0IqLEAg?e=nWNAGv'}],resources:[],
-  del:[],
-  ai:['Complete the attached Formative Evaluation Plan. Design an evaluation framework using Kirkpatrick\'s Four Levels for [topic]. Define metrics, collection methods, timeline, and responsible parties per level.','Create a Level 1 (reaction) survey for an eLearning course on [topic]. Mix Likert scales and open-ended questions.']},
-
-'adaptive-paths':{name:'Draw Adaptive Learning Paths',phase:'design',
-  desc:'Design branching or adaptive pathways that personalize the learner experience based on pre-assessment results, role, or in-course performance.',
-  sub:['Define learner segments or personas','Map content paths for each segment','Design branching logic based on assessment','Create remediation paths for struggling learners','Plan acceleration paths for advanced learners'],
-  tools:[{n:'Miro'}],resources:[],
-  del:['Adaptive learning path diagram (within Course Design)'],
-  ai:['Design adaptive learning paths for [topic]. Three audience segments: [describe]. Map personalized paths with branching, remediation, and acceleration.','Create a decision tree for adaptive branching after a pre-assessment. Define score thresholds and content differences.']},
-
-'course-design':{name:'Course Design or Storyboard',phase:'development',
-  desc:'Create the detailed, screen-by-screen blueprint of the learning experience. Maps content, interactions, assessments, media, and navigation for each module. Serves as the development blueprint.',
-  sub:['Organize content into modules, lessons, screens','Write on-screen text, narration, interaction descriptions','Specify media requirements','Map interactions, practice, branching logic','Include assessment items per objective','Apply Gagné\'s 9 Events as framework'],
-  tools:[{n:'Course Design Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQDQM4kZvKQUSZ8lJ7qdHoOpAURMpoTA4e5018Ie7YrBIy8?e=fQ7F0H'},{n:'Storyboard Template'}],resources:[],
-  del:['Course Design (completed)','Storyboard (completed)'],
-  ai:['Create a storyboard outline for a module on [topic]. Per screen: title, text, narration, interaction, media, objective addressed. Use Gagné\'s 9 Events.','Write narration scripts for this storyboard. Tone: [style], ~[X] seconds per script: [paste screens]']},
-
-'formative-eval':{name:'Formative Evaluation Plan',phase:'development',
-  desc:'Plan how the course will be evaluated during development through one-to-one reviews, small-group trials, and expert reviews. Catches problems early.',
-  sub:['Define evaluation stages (one-to-one, small group, field trial)','Identify evaluators per stage','Create evaluation instruments and checklists','Establish timelines per round','Define revision criteria and thresholds'],
-  tools:[{n:'Formative Evaluation Plan Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQCF7huxTI-fSIxmzVtWKUwbAdbscBKsV6nh1ZEY0IqLEAg?e=nWNAGv'}],resources:[],
-  del:['Formative Evaluation Plan'],
-  ai:['Complete the attached Formative Evaluation Template. Create a formative evaluation plan for [topic] eLearning. Three stages: one-to-one, small-group ([N] learners), field trial. Define purpose, participants, data collection, revision criteria.','Design a one-to-one evaluation protocol. Include think-aloud instructions, observation checklist, post-session interview questions.']},
-
-'develop-materials':{name:'Develop Instructional Materials',phase:'development',
-  desc:'The core production phase — build all content, interactions, assessments, and multimedia in the authoring tool. Typically the longest and most resource-intensive phase.',
-  sub:['Build course structure and navigation','Develop on-screen content and interactions','Write scripts and produce voiceover','Develop activities and practice exercises','Write assessment feedback','Produce and integrate multimedia','Apply accessibility and UDL principles','Design navigation and UI elements','Conduct internal quality checks'],
-  tools:[{n:'eLearning Quality Checklist'},{n:'Revision Tracker (ID) Template'},{n:'Revision Tracker (SME) Template'},{n:'Adobe Creative Cloud Apps'},{n:'Articulate 360'},{n:'ChatGPT, Claude AI'},{n:'ElevenLabs'},{n:'Envato'},{n:'GitHub'},{n:'Ludo AI'},{n:'Skybox AI'},{n:'Synthesia'},{n:'Ting PNG'}],resources:[],
-  del:['Developed eLearning course files','All multimedia assets','Narration audio files','Interaction source files'],
-  ai:['Write eLearning content for [topic]. Objective: [objective]. Conversational tone, chunked, suggest interaction and media placements.','Create a scenario-based branching interaction for [skill]. Include setup, 3 decision points, consequences, feedback.','Write correct/incorrect feedback for these quiz items. Explain WHY each answer is right/wrong: [paste questions]','Generate alt text and accessibility descriptions for these screens (WCAG 2.1 AA): [describe visuals]']},
-
-'alpha-testing':{name:'Conduct Alpha "Wireframe" Testing for eLearning',phase:'implementation',
-  desc:'Internal testing of the near-final build to identify functional issues, content errors, and usability problems before SME review. Focuses on technical functionality and UX.',
-  sub:['Define alpha test plan and test cases','Recruit internal testers','Execute tests across target platforms','Document bugs, issues, enhancement requests','Address critical issues before beta'],
-  tools:[{n:'eLearning Quality Checklist',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQDrVidfN3x6RYVa8cp0fG9KAawVhAVDjyk7fOUxDQjxrrQ?e=k1l2jO'}],resources:[],
-  del:['Alpha test report','Bug/issue log','Revised course build'],
-  ai:['Create alpha test cases for an eLearning course. Cover: navigation, interactions, scoring, branching, media, SCORM/xAPI tracking, accessibility. Format as spreadsheet.']},
-
-'beta-testing':{name:'Conduct Beta (SME + Stakeholder) Testing',phase:'implementation',
-  desc:'Formal review by SMEs and stakeholders to validate content accuracy, relevance, and business alignment. This is the content sign-off stage.',
-  sub:['Distribute course with review guidelines','Provide SME review checklist','Collect and consolidate feedback','Conduct stakeholder walkthrough','Implement revisions','Obtain formal sign-off'],
-  tools:[{n:'Checklist for SME Review of Instructional Materials'}],resources:[],
-  del:['SME review feedback log','Revised course build'],
-  ai:['Draft an email to SMEs requesting course review. Include focus areas, feedback method, deadline, checklist link.','Consolidate and prioritize this SME feedback. Categorize as: critical, important, nice-to-have: [paste feedback]']},
-
-'publish-lms':{name:'Publish Course to LMS or Learning Ecosystem',phase:'implementation',
-  desc:'Package and deploy the finalized course to the LMS. Configure enrollment, tracking, reporting, and completion criteria.',
-  sub:['Export in required format (SCORM, xAPI, cmi5)','Upload and configure in LMS','Set enrollment rules and availability dates','Configure completion criteria and certificates','Set up reporting dashboards'],
-  tools:[],resources:[],
-  del:['Published course in LMS','Enrollment plan'],
-  ai:['Create a SCORM/xAPI publishing checklist for [LMS name]. Include pre-upload, configuration, and post-upload verification.','Draft a course launch email for [audience]. Include: what, why, how to access, deadline, time estimate, support contact.']},
-
-'final-qa':{name:'Conduct Final QA (LMS + Technical)',phase:'implementation',
-  desc:'Final quality assurance in the production environment. Verify tracking, scoring, completion, and reporting all function correctly in the real LMS.',
-  sub:['Test complete flow in production LMS','Verify SCORM/xAPI tracking','Test completion and certificate triggers','Verify reporting accuracy','Test across browsers and devices','Final accessibility audit'],
-  tools:[],resources:[],
-  del:['Final QA test report','Tracking verification results','Go-live approval'],
-  ai:['Create a final QA test plan for production LMS. Cover: SCORM tracking, completion, scores, bookmarking, certificates, cross-platform compatibility.']},
-
-'launch-training':{name:'Launch Training',phase:'implementation',
-  desc:'Formal organization-wide launch. Includes communication campaigns, enrollment notifications, and support readiness.',
-  sub:['Execute launch communication plan','Send enrollment notifications','Brief help desk/support team','Monitor initial activity','Address day-one issues quickly'],
-  tools:[],resources:[],
-  del:['Launch communications (sent)','Enrollment confirmation'],
-  ai:['Create a multi-channel launch plan for [topic] training. Include: email, manager talking points, intranet post, Slack message. Audience: [describe].','Write a launch day email for mandatory training. Include: coverage, importance, access link, deadline, time estimate.']},
-
-'summative-eval':{name:'Summative Evaluation of Training',phase:'evaluation',
-  desc:'Comprehensive evaluation using the metrics defined in Design. Analyze data across Kirkpatrick levels to determine if training achieved its objectives and impacted business performance.',
-  sub:['Collect/analyze Level 1 (Reaction) data','Collect/analyze Level 2 (Learning) data','Plan/execute Level 3 (Behavior) collection','Analyze Level 4 (Results) data','Compile evaluation report','Present findings to stakeholders'],
-  tools:[{n:'Summative Evaluation Plan Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQCusjSwSs9DTKI-2xz7XAkEAb0a5B6Wiik88mn2c_0P2gM?e=3buQU1'}],resources:[],
-  del:['Summative Evaluation Plan','Data analysis results','Stakeholder presentation'],
-  ai:['Analyze this training evaluation data and identify trends, strengths, areas for improvement: [paste data]. Provide Kirkpatrick-level recommendations.','Draft the executive summary of a summative evaluation report. Training on [topic] for [audience]. Findings: [list].']},
-
-'revise-training':{name:'Revise Training',phase:'evaluation',
-  desc:'Based on evaluation data, implement revisions to improve the training — content updates, interaction redesigns, assessment refinements, or structural changes.',
-  sub:['Prioritize revisions from evaluation findings','Plan revision scope and timeline','Implement changes','Re-test revised sections','Re-publish updated course','Document changes in revision tracker'],
-  tools:[{n:'Revision Tracker (ID) Template'},{n:'Revision Tracker (SME) Template'}],resources:[],
-  del:['Revised course build','Completed revision tracker','Change log'],
-  ai:['Create a prioritized revision plan from this feedback. Categorize as: quick wins, medium effort, major redesigns. Include time estimates: [paste feedback].','Rewrite this confusing section. Feedback: [paste]. Original: [paste]. Make clearer while maintaining accuracy.']},
-
-'project-summary':{name:'Project Summary',phase:'close',
-  desc:'Comprehensive document capturing the full project lifecycle — intake to evaluation results. Serves as the official record and reference for future projects.',
-  sub:['Compile project metrics (timeline, budget, scope)','Summarize key decisions and outcomes','Include evaluation results and impact data','Document maintenance recommendations','Archive with all project files'],
-  tools:[{n:'Project Summary Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQBlNVHASXyOQ4gTB5q-9CNSAbhlmvVmVaj465Bmrh7hFIg?e=qQDLn3'}],resources:[],
-  del:['Project Summary','Final metrics report'],
-  ai:['Draft a project summary. Project: [describe]. Metrics: [timeline, budget, scope]. Evaluation: [summary]. Include: overview, scope, milestones, outcomes, evaluation, lessons learned, recommendations.','Write an executive summary paragraph for close-out. Training achieved [results] and [impact]. Highlights: [list].']},
-
-'closeout-meeting':{name:'Host Close-Out Meeting w/ Stakeholders',phase:'close',
-  desc:'Formal close-out meeting to review outcomes, lessons learned, evaluation results, and recommendations for future iterations.',
-  sub:['Prepare agenda and materials','Present outcomes and evaluation results','Facilitate lessons learned discussion','Document decisions and recommendations','Formally transition ownership'],
-  tools:[],resources:[],
-  del:['Close-out meeting notes','Lessons learned document'],
-  ai:['Create an agenda for an ISD close-out meeting. Include: outcome review, evaluation highlights, lessons learned, ownership transition, future recs. Project: [describe].','Draft a lessons learned document. Went well: [list]. Challenges: [list]. Recommendations: [list].']},
-
-'deliver-files':{name:'Deliver and Organize All Files',phase:'close',
-  desc:'Organize, package, and deliver all project files, assets, and documentation. Ensure everything is labeled, archived, and accessible for future maintenance.',
-  sub:['Organize source files by category','Create file inventory/manifest','Ensure proper naming and versioning','Transfer to designated storage','Verify client can access everything'],
-  tools:[],resources:[],
-  del:['Organized file package','File manifest/inventory','Transfer confirmation'],
-  ai:['Create a file organization structure and naming convention for an ISD project archive. Folders for: source files, published output, design docs, media, evaluation data, PM files.','Draft a file handoff email with deliverables, locations, and maintenance instructions.']},
-
-'complete':{name:'Project Complete',phase:'close',
-  desc:'Formal end of the ISD project. All deliverables handed off, evaluation complete, lessons documented, project officially closed. The training lives on in the learning ecosystem.',
-  sub:['Confirm all close-out activities are complete','Send thank-you to team members','Update project tracking to "Closed"','Celebrate!'],
-  tools:[],resources:[],
-  del:['Closed project record'],
-  ai:['Write a project completion announcement email to the full team and stakeholders. Project: [describe]. Thank the team and highlight accomplishments.']},
-
-// Gate nodes (all identical content, but unique IDs for positioning)
-'rte-1':{name:'Review, Test, and Evaluate',phase:'design',desc:'Quality gate: review and validate all work completed to this point. Ensure deliverables are aligned, approved, and ready for the next stage.',sub:['Peer/SME review of deliverables','Verify stakeholder approval','Confirm alignment with objectives','Address open issues or change requests'],tools:[],resources:[],del:['Review checklist (completed)','Sign-off documentation'],ai:['Create a quality review checklist for instructional design deliverables at this stage of the project.']},
-'rte-2':{name:'Review, Test, and Evaluate',phase:'design',desc:'Quality gate: review and validate all work completed to this point. Ensure deliverables are aligned, approved, and ready for the next stage.',sub:['Peer/SME review of deliverables','Verify stakeholder approval','Confirm alignment with objectives','Address open issues or change requests'],tools:[],resources:[],del:['Review checklist (completed)','Sign-off documentation'],ai:['Create a quality review checklist for instructional design deliverables at this stage of the project.']},
-'rte-3':{name:'Review, Test, and Evaluate',phase:'design',desc:'Development entry gate. Confirm all design deliverables are complete and provide a clear blueprint for development. Verify resources and tools are ready.',sub:['Final review of all design documents','Confirm development tools are set up','Verify media production resources','Conduct development kick-off'],tools:[],resources:[],del:['Development readiness checklist','Design-to-development handoff'],ai:['Create a development readiness checklist verifying design deliverables are complete for production.']},
-'rte-4':{name:'Review, Test, and Evaluate',phase:'development',desc:'Development completion gate. Verify all content is built, media integrated, interactions function, and course is ready for testing.',sub:['Complete internal QA pass','Verify all media integration','Test interactions, branching, scoring','Review accessibility compliance','Prepare for alpha testing'],tools:[],resources:[],del:['QA test results','Bug tracker','Alpha-ready build'],ai:['Create a QA checklist for eLearning before alpha testing: content accuracy, interaction functionality, media, navigation, scoring, accessibility.']},
-'rte-5':{name:'Review, Test, and Evaluate',phase:'implementation',desc:'Transition gate between implementation and formal evaluation. Confirm successful launch, initial data flowing, and evaluation plan ready.',sub:['Confirm successful deployment and enrollment','Verify evaluation instruments in place','Review initial learner data for issues','Finalize summative evaluation timeline'],tools:[],resources:[],del:['Launch verification checklist','Evaluation readiness confirmation'],ai:['Create a post-launch monitoring checklist for week one: enrollment rates, completion, technical issues, help desk tickets, initial feedback.']},
-'rte-6':{name:'Review, Test, and Evaluate',phase:'evaluation',desc:'Final quality gate before project closure. Verify all evaluation is complete, revisions implemented, and project ready to close.',sub:['Confirm all revisions implemented and tested','Verify final course version published','Confirm evaluation reports complete','Gather final stakeholder feedback'],tools:[],resources:[],del:['Final verification checklist','Closure readiness confirmation'],ai:['Create a project closure readiness checklist: final deliverables, stakeholder approvals, evaluation completion, file organization, knowledge transfer.']}
+// ═══════════════════════════════════════════
+// SVG ICON FACTORY — Black (#000) + Teal (#013B46) + Cyan (#079EB1)
+// ═══════════════════════════════════════════
+const C1='#000',C2='#079EB1',C3='#013B46';
+const ICONS={
+clipboard:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="4" y="3" width="14" height="17" rx="2" stroke="${C3}" stroke-width="1.5"/><rect x="7" y="1" width="8" height="4" rx="1" fill="${C2}" stroke="${C3}" stroke-width="1.2"/><line x1="8" y1="9" x2="14" y2="9" stroke="${C1}" stroke-width="1.2" stroke-linecap="round"/><line x1="8" y1="12" x2="14" y2="12" stroke="${C1}" stroke-width="1.2" stroke-linecap="round"/><line x1="8" y1="15" x2="12" y2="15" stroke="${C1}" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+rocket:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2C11 2 7 6 7 12l4 4 4-4c0-6-4-10-4-10z" fill="${C2}" stroke="${C3}" stroke-width="1.4" stroke-linejoin="round"/><circle cx="11" cy="9" r="1.5" fill="#fff" stroke="${C3}" stroke-width="1"/><path d="M7 12l-2 3h4" stroke="${C1}" stroke-width="1.2" stroke-linejoin="round"/><path d="M15 12l2 3h-4" stroke="${C1}" stroke-width="1.2" stroke-linejoin="round"/><path d="M9 19l2 1 2-1" stroke="${C2}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+search:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="10" cy="10" r="6" stroke="${C3}" stroke-width="1.5"/><line x1="14.5" y1="14.5" x2="19" y2="19" stroke="${C1}" stroke-width="2" stroke-linecap="round"/><line x1="7" y1="10" x2="13" y2="10" stroke="${C2}" stroke-width="1.2" stroke-linecap="round"/><line x1="10" y1="7" x2="10" y2="13" stroke="${C2}" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+people:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="8" cy="7" r="3" fill="${C2}" stroke="${C3}" stroke-width="1.3"/><circle cx="15" cy="7" r="2.5" stroke="${C2}" stroke-width="1.3"/><path d="M2 18c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="${C3}" stroke-width="1.5" stroke-linecap="round"/><path d="M14 12c2.2 0 4 1.8 4 4v2" stroke="${C2}" stroke-width="1.3" stroke-linecap="round"/></svg>`,
+chart:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="12" width="3.5" height="7" rx="1" fill="${C2}" stroke="${C3}" stroke-width="1.2"/><rect x="9.25" y="8" width="3.5" height="11" rx="1" fill="${C2}" stroke="${C3}" stroke-width="1.2"/><rect x="15.5" y="4" width="3.5" height="15" rx="1" fill="${C3}" stroke="${C3}" stroke-width="1.2"/><path d="M3 5l5 3 5-4 5 2" stroke="${C1}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+diamond:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="11" y="3" width="10" height="10" rx="1.5" transform="rotate(45 11 3)" fill="${C2}" stroke="${C3}" stroke-width="1.5"/><text x="11" y="13" text-anchor="middle" fill="${C3}" font-size="9" font-weight="900">?</text></svg>`,
+stop:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="2" stroke="${C3}" stroke-width="1.3"/><line x1="8" y1="8" x2="14" y2="14" stroke="${C1}" stroke-width="1.8" stroke-linecap="round"/><line x1="14" y1="8" x2="8" y2="14" stroke="${C1}" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+target:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="${C3}" stroke-width="1.3"/><circle cx="11" cy="11" r="5" stroke="${C2}" stroke-width="1.3"/><circle cx="11" cy="11" r="2" fill="${C1}"/></svg>`,
+checklist:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="2" width="16" height="18" rx="2" stroke="${C3}" stroke-width="1.3"/><polyline points="7,8 9,10 13,6" stroke="${C2}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="7" y1="14" x2="15" y2="14" stroke="${C1}" stroke-width="1.2" stroke-linecap="round"/><line x1="7" y1="17" x2="12" y2="17" stroke="${C1}" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+pencil:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M14 3l5 5-11 11H3v-5L14 3z" fill="${C2}" stroke="${C3}" stroke-width="1.3" stroke-linejoin="round"/><line x1="12" y1="5" x2="17" y2="10" stroke="${C3}" stroke-width="1.3"/></svg>`,
+document:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M5 3h8l5 5v11a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" stroke="${C3}" stroke-width="1.3"/><path d="M13 3v5h5" stroke="${C2}" stroke-width="1.3"/><line x1="7" y1="12" x2="15" y2="12" stroke="${C1}" stroke-width="1.2" stroke-linecap="round"/><line x1="7" y1="15" x2="13" y2="15" stroke="${C1}" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+calendar:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="15" rx="2" stroke="${C3}" stroke-width="1.3"/><line x1="3" y1="9" x2="19" y2="9" stroke="${C3}" stroke-width="1.2"/><line x1="8" y1="2" x2="8" y2="6" stroke="${C1}" stroke-width="1.5" stroke-linecap="round"/><line x1="14" y1="2" x2="14" y2="6" stroke="${C1}" stroke-width="1.5" stroke-linecap="round"/><rect x="6" y="11.5" width="3" height="2.5" rx=".5" fill="${C2}"/><rect x="11" y="11.5" width="3" height="2.5" rx=".5" fill="${C3}"/></svg>`,
+checkmark:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="${C3}" stroke-width="1.3"/><polyline points="7,11 10,14 15,8" stroke="${C2}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+puzzle:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 8h3a2 2 0 110-4h3v3a2 2 0 104 0V4h4v6h-3a2 2 0 100 4h3v4H4V8z" fill="${C2}" stroke="${C3}" stroke-width="1.2" stroke-linejoin="round"/></svg>`,
+barchart:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="14" width="3" height="5" rx=".5" fill="${C2}" stroke="${C3}" stroke-width="1"/><rect x="8" y="10" width="3" height="9" rx=".5" fill="${C2}" stroke="${C3}" stroke-width="1"/><rect x="13" y="6" width="3" height="13" rx=".5" fill="${C3}" stroke="${C3}" stroke-width="1"/></svg>`,
+fork:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="5" cy="11" r="2" fill="${C2}" stroke="${C3}" stroke-width="1.3"/><circle cx="17" cy="6" r="2" fill="${C2}" stroke="${C3}" stroke-width="1.3"/><circle cx="17" cy="16" r="2" fill="${C2}" stroke="${C3}" stroke-width="1.3"/><path d="M7 11h3c2 0 3-1 5-5" stroke="${C1}" stroke-width="1.5" stroke-linecap="round"/><path d="M10 11c2 0 3 1 5 5" stroke="${C1}" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+film:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="14" rx="2" stroke="${C3}" stroke-width="1.3"/><line x1="7" y1="4" x2="7" y2="18" stroke="${C3}" stroke-width="1"/><line x1="15" y1="4" x2="15" y2="18" stroke="${C3}" stroke-width="1"/><circle cx="11" cy="11" r="2.5" stroke="${C2}" stroke-width="1.5"/><polygon points="10,10 10,12.5 12.5,11" fill="${C1}"/></svg>`,
+flask:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M8 3h6v5l4 9a1 1 0 01-1 1.5H5a1 1 0 01-1-1.5l4-9V3z" stroke="${C3}" stroke-width="1.3" stroke-linejoin="round"/><line x1="8" y1="3" x2="14" y2="3" stroke="${C1}" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="14" r="1.2" fill="${C2}"/><circle cx="13" cy="15" r=".8" fill="${C2}"/></svg>`,
+build:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M5 14l-2 5h4l-2-5z" fill="${C2}" stroke="${C3}" stroke-width="1.2" stroke-linejoin="round"/><rect x="8" y="6" width="10" height="10" rx="1" stroke="${C3}" stroke-width="1.3"/><line x1="11" y1="9" x2="15" y2="9" stroke="${C2}" stroke-width="1.3" stroke-linecap="round"/><line x1="11" y1="11.5" x2="15" y2="11.5" stroke="${C1}" stroke-width="1.2" stroke-linecap="round"/><line x1="11" y1="13.5" x2="14" y2="13.5" stroke="${C1}" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+beaker:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="6" y="3" width="10" height="5" rx="1" stroke="${C3}" stroke-width="1.3"/><path d="M6 8l-2 8a2 2 0 002 2h10a2 2 0 002-2l-2-8" stroke="${C3}" stroke-width="1.3"/><line x1="5" y1="14" x2="17" y2="14" stroke="${C2}" stroke-width="1.2"/><circle cx="9" cy="16" r="1.2" fill="${C2}"/><circle cx="12" cy="16.5" r=".8" fill="${C2}"/></svg>`,
+eye:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M2 11s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" stroke="${C3}" stroke-width="1.3"/><circle cx="11" cy="11" r="3" fill="${C2}" stroke="${C3}" stroke-width="1.3"/><circle cx="11" cy="11" r="1.2" fill="${C1}"/></svg>`,
+cloud:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M6 16h10a4 4 0 000-8 5 5 0 00-10 1 3 3 0 000 7z" stroke="${C3}" stroke-width="1.3"/><polyline points="9,13 11,15 13,11" stroke="${C2}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+lock:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="5" y="10" width="12" height="9" rx="2" fill="${C3}" stroke="${C3}" stroke-width="1.3"/><path d="M8 10V7a3 3 0 016 0v3" stroke="${C1}" stroke-width="1.5"/><circle cx="11" cy="15" r="1.5" fill="${C2}"/></svg>`,
+star:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><polygon points="11,2 13.5,8 20,8.5 15,13 16.5,19.5 11,16 5.5,19.5 7,13 2,8.5 8.5,8" fill="${C2}" stroke="${C3}" stroke-width="1.3" stroke-linejoin="round"/></svg>`,
+piechart:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="${C3}" stroke-width="1.3"/><path d="M11 3v8h8" stroke="${C3}" stroke-width="1.3"/><path d="M11 11l5.6 5.6" stroke="${C2}" stroke-width="1.3"/><path d="M11 3a8 8 0 018 8" fill="${C2}"/></svg>`,
+refresh:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 11a7 7 0 0112.5-4.3" stroke="${C3}" stroke-width="1.5" stroke-linecap="round"/><path d="M18 11a7 7 0 01-12.5 4.3" stroke="${C2}" stroke-width="1.5" stroke-linecap="round"/><polyline points="16,3 17,7 13,7" stroke="${C1}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="6,19 5,15 9,15" stroke="${C1}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+briefcase:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="7" width="16" height="12" rx="2" stroke="${C3}" stroke-width="1.3"/><path d="M8 7V5a2 2 0 012-2h2a2 2 0 012 2v2" stroke="${C1}" stroke-width="1.3"/><line x1="3" y1="12" x2="19" y2="12" stroke="${C2}" stroke-width="1.2"/></svg>`,
+handshake:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10l4-4 3 1 3-1 4 4" stroke="${C3}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10l2 6 4-2 3 3 3-3 4 2 2-6" stroke="${C3}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="13" r="1.3" fill="${C2}"/></svg>`,
+package:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 7l8-4 8 4v8l-8 4-8-4V7z" stroke="${C3}" stroke-width="1.3" stroke-linejoin="round"/><line x1="11" y1="11" x2="11" y2="19" stroke="${C3}" stroke-width="1"/><line x1="3" y1="7" x2="11" y2="11" stroke="${C3}" stroke-width="1"/><line x1="19" y1="7" x2="11" y2="11" stroke="${C3}" stroke-width="1"/><line x1="7" y1="5" x2="15" y2="9" stroke="${C2}" stroke-width="1.2"/></svg>`,
+trophy:`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M7 4h8v6a4 4 0 01-8 0V4z" fill="${C2}" stroke="${C3}" stroke-width="1.3"/><path d="M7 6H4a1 1 0 00-1 1v1a3 3 0 003 3h1" stroke="${C3}" stroke-width="1.2"/><path d="M15 6h3a1 1 0 011 1v1a3 3 0 01-3 3h-1" stroke="${C3}" stroke-width="1.2"/><line x1="11" y1="14" x2="11" y2="17" stroke="${C1}" stroke-width="1.3"/><line x1="8" y1="17" x2="14" y2="17" stroke="${C1}" stroke-width="1.8" stroke-linecap="round"/></svg>`
 };
 
-// ───────── LAYOUT COLUMNS ─────────
-// Each column: {t:'node'|'arrow'|'sep', id, above:[], below:[], label}
-const L = [
-  // ── DISCOVERY ──
-  {t:'node',id:'intake',shape:'dark'},
-  {t:'arrow'},
-  {t:'node',id:'kickoff',shape:'shield'},
-  {t:'arrow'},
-  {t:'node',id:'review-content',shape:'dark'},
-  {t:'arrow'},
-  {t:'node',id:'stakeholder-map',shape:'dark'},
-  {t:'arrow'},
-  {t:'node',id:'performance-analysis',shape:'shield'},
+function ic(n){return ICONS[n]||'';}
 
-  // ── ANALYSIS ── (phase break)
-  {t:'arrow',phaseBreak:true},
-  {t:'node',id:'decision',shape:'diamond',below:['non-training']},
-  {t:'arrow',label:'YES',wide:true},
-  {t:'node',id:'identify-goals',shape:'dark'},
-  {t:'arrow'},
-  {t:'node',id:'needs-assessment',shape:'shield'},
+// Format AI prompt text - highlight [placeholders]
+function fmtAI(t){return t.replace(/\[([^\]]+)\]/g,'<span class="placeholder">[$1]</span>');}
 
-  // ── DESIGN ── (phase break)
-  {t:'arrow',phaseBreak:true},
-  {t:'node',id:'write-objectives',shape:'dark'},
-  {t:'arrow'},
-  {t:'node',id:'training-proposal',shape:'shield'},
-  {t:'arrow'},
-  {t:'node',id:'project-plan',shape:'shield'},
-  {t:'arrow',above:['rte-1']},
-  {t:'node',id:'develop-assessments',shape:'dark'},
-  {t:'arrow'},
-  {t:'node',id:'design-strategy',shape:'dark'},
-  {t:'arrow',above:['rte-2']},
-  {t:'node',id:'define-metrics',shape:'dark'},
-  {t:'arrow'},
-  {t:'node',id:'adaptive-paths',shape:'dark'},
+// ═══════════════════════════════════════════
+// FULL MILESTONE DATA
+// ═══════════════════════════════════════════
+const DATA=[
+// ── PHASE 1: DISCOVERY ──
+{n:'01',name:'Discovery',rte:null,items:[
+{name:'Business Problem or Intake Submission',ic:'clipboard',t:'process',desc:'The entry point of every ISD project. A stakeholder submits a request identifying a business problem, performance gap, or learning need, triggering the formal project pipeline.',subs:['Receive and log the intake request','Conduct initial screening for completeness','Acknowledge receipt and set expectations'],tools:[],del:[],ai:[]},
 
-  // ── DEVELOPMENT ── (phase break + RTE)
-  {t:'arrow',above:['rte-3'],phaseBreak:true},
-  {t:'node',id:'course-design',shape:'shield'},
-  {t:'arrow'},
-  {t:'node',id:'formative-eval',shape:'shield'},
-  {t:'arrow'},
-  {t:'node',id:'develop-materials',shape:'dark'},
+{name:'Kick-off Meeting',ic:'rocket',t:'milestone',meeting:true,desc:'A structured meeting with stakeholders and SMEs to align on project scope, goals, constraints, timelines, and success criteria. Establishes the foundation for the project and builds early stakeholder buy-in.',subs:['Prepare and distribute meeting agenda','Identify and invite all key stakeholders and SMEs','Clarify business objectives and success criteria','Document decisions, action items, and open questions','Establish communication cadence and project governance'],tools:[{n:'Kick-Off Meeting Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQA1AFS-f1tCR7-GuEOtQNmSAfY36hqt6q6ZOfzIZ3xUsYg?e=EzjC7v'}],del:['Kick-off Meeting Agenda','Project Summary'],ai:[{ref:'Kick-Off Agenda Generator',prompt:'Create an agenda for an instructional design project kick-off meeting. The project is: [describe]. Include time allocations, discussion prompts, and a section for identifying risks.'},{ref:'Post-Meeting Summary Email',prompt:'Based on these kick-off notes, draft a summary email with key decisions, action items, and next steps: [paste notes]'},{ref:'Kick-off Meeting Invite',prompt:'Generate a calendar invite for a Kick-off Meeting. Write in a friendly, warm, concise, and professional tone.\n\nInclude:\n1. A brief message summarizing the purpose of the meeting and the expected outcome\n2. A high-level, non-timed meeting agenda\n\nPurpose: Align stakeholders and SMEs on project scope, goals, constraints, timelines, and success criteria. Establish the foundation for the project and build early stakeholder buy-in.\nDesired Outcome: Shared understanding of the project, clear roles and responsibilities, and agreement on next steps.\n\nProject Summary: [attach or paste your Project Summary]'}]},
 
-  // ── IMPLEMENTATION ── (phase break + RTE)
-  {t:'arrow',above:['rte-4'],phaseBreak:true},
-  {t:'node',id:'alpha-testing',shape:'dark'},
-  {t:'arrow'},
-  {t:'node',id:'beta-testing',shape:'dark'},
-  {t:'arrow'},
-  {t:'node',id:'publish-lms',shape:'dark'},
-  {t:'arrow'},
-  {t:'node',id:'final-qa',shape:'dark'},
-  {t:'arrow'},
-  {t:'node',id:'launch-training',shape:'star'},
+{name:'Review Existing Content + Research',ic:'search',t:'process',desc:'Audit and evaluate all existing training materials, documentation, and research. Prevents duplication, identifies reusable assets, and reveals gaps in current learning content.',subs:['Gather all existing training materials','Evaluate quality, accuracy, and relevance','Identify reusable assets vs. content needing updates','Research industry best practices','Document findings and content inventory'],tools:[{n:'Miro Mind Mapping',link:'https://www.miro.com'}],del:['Content inventory spreadsheet','Gap Analysis Report'],ai:[{ref:'Content Audit Template',prompt:'Create a content audit template for evaluating existing training materials. Include columns for: asset name, format, date, topic, quality rating (1-5), relevance, reuse recommendation, and notes.'},{ref:'Course Gap Analyzer',prompt:'Analyze this existing course outline and identify content gaps, outdated information, and improvable sections: [paste outline]'}]},
 
-  // ── EVALUATION ── (phase break + RTE)
-  {t:'arrow',above:['rte-5'],phaseBreak:true},
-  {t:'node',id:'summative-eval',shape:'shield'},
-  {t:'arrow'},
-  {t:'node',id:'revise-training',shape:'dark'},
+{name:'Map the Stakeholder / SME Landscape',ic:'people',t:'process',desc:'Identify and map all stakeholders, SMEs, and decision-makers. Understanding influence and expertise ensures the right people are engaged at the right times throughout the project.',subs:['Identify all stakeholders by role and influence','Map SMEs by domain expertise and availability','Define RACI chart','Establish communication preferences','Plan SME engagement schedule'],tools:[],del:['RACI chart','SME engagement plan'],ai:[{ref:'Stakeholder RACI Builder',prompt:'Create a stakeholder analysis matrix. My stakeholders include: [list]. Generate a RACI chart and recommend engagement strategies for each.'},{ref:'SME Outreach Email',prompt:'Draft an introductory email to an SME requesting participation in a training project on [topic].'}]}
+]},
 
-  // ── PROJECT CLOSE ── (phase break + RTE)
-  {t:'arrow',above:['rte-6'],phaseBreak:true},
-  {t:'node',id:'project-summary',shape:'shield'},
-  {t:'arrow'},
-  {t:'node',id:'closeout-meeting',shape:'dark'},
-  {t:'arrow'},
-  {t:'node',id:'deliver-files',shape:'dark'},
-  {t:'arrow'},
-  {t:'node',id:'complete',shape:'dark'}
+// ── PHASE 2: ANALYSIS ──
+{n:'02',name:'Analysis',rte:null,items:[
+{name:'Performance Analysis',ic:'chart',t:'milestone',desc:'Systematic investigation to determine whether the business problem can be addressed through training or requires a non-training solution (process change, tools, incentives). This is the critical go/no-go gate.',subs:['Define desired vs. current performance state','Identify root causes of the performance gap','Determine knowledge/skill gap vs. environmental issue','Assess organizational readiness','Document findings and recommendation'],tools:[{n:'Performance Analysis Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQDsKsBA4aGkQ5WMqY0D-c9AASLH9zyRbJBw63X9ht8P9Mg?e=zGV6cd'}],del:['Performance Analysis Report','Training vs. non-training recommendation'],ai:[{ref:'Root Cause Diagnostic',prompt:'Conduct a root cause analysis for this performance gap: [describe]. Use categories: knowledge/skills, motivation, environment/tools, incentives, capacity. Provide diagnostic questions for each.'},{ref:'Training Recommendation Draft',prompt:'Based on this analysis data, draft a recommendation on whether training is appropriate: [paste data]'}]},
+
+{name:'Performance Analysis Meeting',ic:'people',t:'milestone',meeting:true,desc:'A meeting with key stakeholders and SMEs to present performance analysis findings, discuss root causes, and align on whether the gap warrants a training solution or an alternative intervention.',subs:['Prepare and distribute performance analysis findings in advance','Present desired vs. current performance state','Review root cause analysis results','Discuss training vs. non-training recommendation','Align on next steps and document decisions'],tools:[],del:['Performance Analysis Meeting Notes','Stakeholder Alignment on Recommendation'],ai:[{ref:'Performance Analysis Meeting Agenda',prompt:'Create an agenda for a performance analysis review meeting. The performance gap is: [describe]. Include time allocations for presenting findings, discussing root causes, and deciding on training vs. non-training solutions.'},{ref:'Post-Meeting Summary',prompt:'Based on these performance analysis meeting notes, draft a summary email with key findings, the training/non-training decision, and next steps: [paste notes]'},{ref:'Performance Analysis Meeting Invite',prompt:'Generate a calendar invite for a Performance Analysis Meeting. Write in a friendly, warm, concise, and professional tone.\n\nInclude:\n1. A brief message summarizing the purpose of the meeting and the expected outcome\n2. A high-level, non-timed meeting agenda\n\nPurpose: Present performance analysis findings and align on whether the identified gap warrants a training solution or a non-training intervention.\nDesired Outcome: Stakeholder consensus on root causes and agreement on the recommended path forward.\n\nProject Summary: [attach or paste your Project Summary]'}]},
+
+{name:'Training Decision',ic:'diamond',t:'gate',desc:'The critical decision gate based on performance analysis findings. If the root cause is a knowledge or skill gap, the project continues. If environmental, procedural, or motivational, a non-training solution is proposed.',subs:['Review performance analysis findings','Consult with stakeholders on recommendation','Document the decision rationale','If YES: proceed to Needs Assessment and Analysis','If NO: propose alternative solution and close project'],tools:[{n:'Training Proposal Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQCebEEhGdHpTqIOl9Go47Z2AYALluAZA4xOe4-dC87pD7o?e=sf7i57'}],del:['Training Proposal'],ai:[]},
+
+{name:'Identify Instructional Goal(s)',ic:'target',t:'process',desc:'Translate business objectives and performance gaps into clear, measurable instructional goals that define what learners will be able to do after training. These goals drive all subsequent design decisions.',subs:['Review performance analysis and business objectives','Draft instructional goal statements','Validate goals with stakeholders and SMEs','Ensure goals are measurable and observable'],tools:[{n:'Needs Assessment Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQB1wXdXDEHWQofTD9carV0RATf0TjlAjI1V6Gs3q8M8yb8?e=FwCGHx'}],del:['Needs Assessment (partially complete)'],ai:[{ref:'Instructional Goal Converter',prompt:'Convert these business objectives into measurable instructional goals: [list]. Each should describe what the learner will do, under what conditions, and to what standard.'},{ref:'Goal Evaluator',prompt:'Evaluate the following instructional goal(s) against these criteria:\n\n1. CONGRUENCE WITH ORGANIZATIONAL NEEDS\n• Is the goal clearly linked to an identified organizational problem?\n• Is it linked to documented performance gaps?\n• Does it clearly solve the business problem?\n• Do stakeholders approve the goal?\n\n2. CAPACITY\n• Is there sufficient capacity, time, and budget to develop and deliver?\n• Is there an adequate number of learners for testing?\n\n3. CLARITY\n• Does the goal state the intended learner audience?\n• Does it describe what learners will be able to do?\n• Does it describe the conditions under which learners will perform?\n\nFor each criterion, rate as Met, Partially Met, or Not Met with a brief justification. Provide an overall assessment and specific recommendations for improvement.\n\nInstructional Goal(s): [paste your instructional goal(s)]'}]},
+
+{name:'Needs Assessment',ic:'checklist',t:'milestone',desc:'The Needs Assessment encompasses three core analysis activities that together ensure the training solution is grounded in a thorough understanding of the performance gap, the target audience, and the job requirements.',subs:['<strong>Assess Needs and Conduct Instructional Analysis</strong> — Decompose the learning need: goals analysis, subordinate skills analysis, entry-level skills, instructional/performance contexts','<strong>Analyze Learners and Contexts</strong> — Profile target audience, analyze learning context and performance context, define demographics, assess motivations and preferences, identify transfer barriers','<strong>Conduct Job/Skills Analysis</strong> — Interview SMEs and high performers, observe task performance, document task sequences and decision points, identify critical vs. nice-to-have skills, validate with multiple SMEs'],tools:[{n:'Needs Assessment Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQB1wXdXDEHWQofTD9carV0RATf0TjlAjI1V6Gs3q8M8yb8?e=FwCGHx'},{n:'Job Analysis Template',link:'https://1drv.ms/x/c/cc839e3a35a19644/IQAARWg8dteUQ6UbkXgur40tAc7GBBmZlDEeXIuOfkhc-a8?e=0ggG1v'}],del:['Needs Assessment (completed in full)'],ai:[{ref:'Needs Assessment Completer',prompt:'Complete the attached Needs Assessment Template covering instructional analysis, learner analysis, and job/task analysis for a training project on [topic]. For each analysis, define the approach, data collection methods, and expected outputs.'},{ref:'Subordinate Skills Breakdown',prompt:'Conduct a subordinate skills analysis for this goal: [state goal]. Break it into all knowledge and skills organized hierarchically.'},{ref:'Learner Profile Builder',prompt:'Create a learner analysis profile for: [describe audience]. Include prior knowledge, preferences, tech comfort, motivations, and barriers.'},{ref:'Task Analysis Generator',prompt:'Create a task analysis for the role of [job title]. Break down responsibilities into discrete tasks with knowledge, skills, and tools required.'}]},
+
+{name:'Needs Assessment Meeting(s)',ic:'people',t:'milestone',meeting:true,desc:'One or more meetings with SMEs, stakeholders, and target learners to validate needs assessment findings, review instructional analysis results, and confirm learner profiles and job/task analysis outputs.',subs:['Schedule and distribute needs assessment findings in advance','Review instructional analysis and subordinate skills','Validate learner profiles and context analysis','Confirm job/task analysis with SMEs','Document agreements, open questions, and revisions needed'],tools:[],del:['Needs Assessment Meeting Notes','Validated Needs Assessment Findings'],ai:[{ref:'Needs Assessment Meeting Agenda',prompt:'Create an agenda for a needs assessment review meeting for a training project on [topic]. Include sections for reviewing instructional analysis, learner analysis, and job/task analysis findings.'},{ref:'Post-Meeting Validation Summary',prompt:'Based on these needs assessment meeting notes, draft a validation summary documenting what was confirmed, what needs revision, and outstanding questions: [paste notes]'},{ref:'Needs Assessment Meeting Invite',prompt:'Generate a calendar invite for a Needs Assessment Meeting. Write in a friendly, warm, concise, and professional tone.\n\nInclude:\n1. A brief message summarizing the purpose of the meeting and the expected outcome\n2. A high-level, non-timed meeting agenda\n\nPurpose: Review and validate needs assessment findings including instructional analysis, learner analysis, and job/task analysis.\nDesired Outcome: SME and stakeholder validation of findings, with documented agreements and any revisions needed before moving to design.\n\nProject Summary: [attach or paste your Project Summary]'}]},
+
+{name:'Write Learning and Terminal Objectives',ic:'pencil',t:'process',desc:'Transform instructional goals into specific, measurable learning objectives (enabling) and terminal objectives. Well-written objectives drive assessment design, content selection, and instructional strategy.',subs:['Write terminal objective','Decompose into learning objectives','Use ABCD format (Audience, Behavior, Condition, Degree)','Align to Bloom\'s Taxonomy levels','Review with SMEs for accuracy'],tools:[{n:'Training Proposal Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQCebEEhGdHpTqIOl9Go47Z2AYALluAZA4xOe4-dC87pD7o?e=juhZOE'}],del:['Training Proposal (partially complete)'],ai:[{ref:'Objective Writer',prompt:'Write learning objectives for [topic]. Terminal objective: [state]. Use Bloom\'s and ABCD format. Generate both terminal and enabling objectives.'},{ref:'Objectives Evaluator',prompt:'Evaluate the following learning objectives against these criteria:\\n\\n1. GOAL STATEMENT\\n• Does it describe the ultimate performance context?\\n• Is the context authentic and realistic?\\n\\n2. BEHAVIORS\\n• Is the behavior congruent with the instructional goal?\\n• Does it describe actions learners perform (not how they respond to learning)?\\n• Is the behavior clear and observable?\\n\\n3. CONDITIONS\\n• Do conditions specify cues or stimulus provided to learners?\\n• Do conditions specify resources and tools needed?\\n• Do conditions control task complexity based on learners\' needs?\\n• Do conditions aid transfer of learning to performance contexts?\\n\\n4. CRITERIA\\n• Is the content congruent with the instructional goal analysis?\\n• Is criteria included only when needed to judge a complex task?\\n• Does criteria include form, physical, aesthetic, and other relevant attributes?\\n\\nFor each criterion, rate as Met, Partially Met, or Not Met with justification. Provide an overall assessment and recommendations.\\n\\nLearning Objectives: [paste your learning objectives]'}]},
+
+{name:'Training Proposal',ic:'document',t:'gate',signoff:true,desc:'Formal document presenting the recommended training solution for stakeholder approval. Includes scope, objectives, delivery method, timeline, budget, and resources. Often the funding gate.',subs:['Compile analysis into proposal narrative','Define delivery modality and approach','Develop budget estimate and resource plan','Create preliminary timeline','Present to stakeholders for approval'],tools:[{n:'Training Proposal Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQCebEEhGdHpTqIOl9Go47Z2AcuMTFJphAwAJIpfLSaqs1w?e=wd3QVX'}],del:['Training Proposal'],ai:[{ref:'Training Proposal Builder',prompt:'Complete the attached Training Proposal for [project]. Include: executive summary, business case, objectives, approach, modality, timeline, budget, success metrics. Details: [provide].'},{ref:'Training Proposal Evaluator',prompt:'Evaluate the attached Training Proposal for completeness, clarity, and stakeholder readiness. Assess the following sections: executive summary, business case/problem statement, instructional goals, proposed solution and delivery modality, target audience, project timeline, budget estimate, resource requirements, success metrics, and risk mitigation. For each section, rate as Strong, Adequate, or Needs Improvement with specific feedback. Flag any missing sections, unsupported claims, or areas likely to draw stakeholder objections. Provide a prioritized list of revisions before submission.\n\nTraining Proposal: [attach or paste your Training Proposal]'}]},
+
+{name:'Training Proposal Review and Sign-off Meeting',ic:'handshake',t:'milestone',meeting:true,desc:'Formal stakeholder meeting to review the Training Proposal, discuss scope, budget, timeline, and delivery approach, and obtain official sign-off to proceed into full design and development.',subs:['Distribute Training Proposal in advance for review','Present executive summary and business case','Walk through proposed solution, timeline, and budget','Address stakeholder questions and concerns','Obtain formal sign-off or document required revisions'],tools:[],del:['Signed Training Proposal','Meeting Notes with Decisions and Action Items'],ai:[{ref:'Training Proposal Review Agenda',prompt:'Create an agenda for a Training Proposal review and sign-off meeting. The proposal covers: [describe project]. Include time for presenting the business case, proposed solution, budget review, Q&A, and formal approval.'},{ref:'Sign-off Confirmation Email',prompt:'Draft a post-meeting email confirming Training Proposal sign-off, summarizing key decisions and approved scope: [paste meeting notes]'},{ref:'Training Proposal Review and Sign-off Meeting Invite',prompt:'Generate a calendar invite for a Training Proposal Review and Sign-off Meeting. Write in a friendly, warm, concise, and professional tone.\n\nInclude:\n1. A brief message summarizing the purpose of the meeting and the expected outcome\n2. A high-level, non-timed meeting agenda\n\nPurpose: Review the Training Proposal — including scope, objectives, delivery approach, timeline, and budget — and obtain formal stakeholder sign-off to proceed.\nDesired Outcome: Approved Training Proposal with documented decisions and authorization to move into full design and development.\n\nProject Summary: [attach or paste your Project Summary]'},{ref:'Training Proposal Review and Sign-off Meeting Pre-Read',prompt:'Generate a Pre-Read document as a Word document (.docx) for stakeholders attending the Training Proposal Review and Sign-off Meeting.\n\nUsing the attached Training Proposal and Project Summary, create a concise stakeholder-ready document that:\n• Summarizes the business problem and performance gap\n• Highlights the proposed training solution, delivery modality, and target audience\n• Outlines the project timeline, budget, and resource requirements\n• Identifies key decision points stakeholders should consider\n• Lists specific questions or items requiring stakeholder input during the meeting\n\nKeep it brief and scannable — stakeholders should be able to review this in 10-15 minutes so they come prepared to discuss and sign off.\n\nTraining Proposal: [attach or paste your Training Proposal]\nProject Summary: [attach or paste your Project Summary]'}]},
+
+{name:'Project Plan + Timeline',ic:'calendar',t:'gate',desc:'Detailed project plan with tasks, milestones, dependencies, resource assignments, and deadlines. Governs execution of remaining ISD phases.',subs:['Estimate duration and effort per task','Identify dependencies and critical path','Assign resources and responsibilities','Create project in Asana'],tools:[{n:'Project Schedule Calculator Claude App',link:'https://alexedaleycreative.github.io/project-schedule-calculator/'},{n:'Project Plan and Timeline Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQA_cue_KsgoQpWU7HF1oolpAXZmVjU1ursG2YaKK-Vszho?e=IYzBUY'},{n:'Project Dashboard Claude App'}],del:['Project Plan and Timeline','Project Dashboard'],ai:[{ref:'Project Plan Creator',prompt:'Create a project plan for a [length] eLearning course on [topic]. Include all ISD phases, durations, dependencies, milestones. Launch date: [date].'},{ref:'Timeline Risk Reviewer',prompt:'Review this timeline for risks — underestimated tasks, missing dependencies, bottlenecks: [paste]'},
+{ref:'Project Dashboard Generator',prompt:'You are building a standalone project dashboard app that I can deploy to GitHub Pages. The dashboard pulls live data from my Asana project via a GitHub Action that runs on a schedule, and publishes a static HTML page that stakeholders can view without an Asana login.\n\nStep 1: Gather project information\nBefore building anything, ask me for the following information one step at a time. Do not proceed until each step is answered.\n\n1a. Project name\nAsk: \"What is the name of your Asana project? I\'ll search Asana to find it and map the tasks.\"\nOnce I provide the project name, search Asana using the search_objects or get_projects tool to find the matching project. Confirm the project name and GID with me before proceeding. Then use get_project (with include_sections: true) and get_tasks (with full custom fields, memberships, assignee, and num_subtasks) to understand the project structure — sections, custom field names, task statuses, and date fields.\n\n1b. Brand colors\nAsk: \"What are your brand colors? I need a primary color (used for the header and accents) and a secondary color (used for highlights and emphasis). Provide hex codes (e.g., #FA4628).\"\n\n1c. Project summary\nAsk: \"Paste a 200-word-max summary of the business problem this project addresses. This appears at the top of the dashboard.\"\n\n1d. Key Dates document\nAsk: \"Upload your Key Dates document. This should contain project milestones with target dates and notes. I\'ll parse it and build the Key Dates table.\"\nParse the uploaded document (Word, PDF, or text) to extract milestone names, target dates, and notes. Build a KEY_DATES JavaScript array from the parsed data.\n\n1e. Stakeholder and SME Involvement Calendar\nAsk: \"Upload your Stakeholder and SME Involvement Calendar. This should list dates, who is involved, what action is required, and which items are sign-off gates. I\'ll parse it and build the What I Need From You section.\"\nParse the uploaded document to extract dates, stakeholder names, required actions, and gate indicators. Build a STK_EVENTS JavaScript array from the parsed data.\n\n1f. Dashboard owner\nAsk: \"Who should be listed as the project owner on the dashboard?\"\n\nStep 2: Explore the Asana project structure\nUsing the Asana MCP connector, gather:\n• Project GID and current status color\n• All sections with their GIDs (for correct ordering in the Gantt chart)\n• All tasks with these opt_fields: name, due_on, start_on, completed, assignee, assignee.name, custom_fields, custom_fields.name, custom_fields.display_value, custom_fields.type, memberships.section.name, memberships.section.gid, num_subtasks\n• Custom field mapping: Identify which custom fields correspond to Status (enum), Due Date (date), Start Date (date), % Done (number), Estimated Hours (number, optional), Actual Hours (number, optional)\nConfirm the custom field names with me if they don\'t match common patterns. The dashboard depends on correctly mapping these fields.\n\nStep 3: Build the GitHub Pages app\nGenerate a complete app with this file structure:\nproject-dashboard/\n  .github/workflows/deploy.yml  (GitHub Action: cron schedule + manual trigger)\n  scripts/build.js              (Node script: fetches Asana API, generates static HTML)\n  template.html                 (Dashboard HTML template with data placeholder)\n  package.json                  (Minimal package.json with build script)\n  README.md                     (Step-by-step setup instructions for GitHub beginners)\n\ntemplate.html requirements:\nThe dashboard must include these sections in this order:\n1. Header: Project name, Project Dashboard with Owner, status badge (On Track/At Risk/Off Track based on Asana project status color), progress bar with completion percentage at title-weight font size. Include Last updated timestamp below the status row.\n2. Project Summary: The business problem summary. Card with clipboard icon.\n3. Stats Row: Five stat cards — Total Tasks, Completed, In Progress, Late Starts (Not Started but past start date), Due This Week.\n4. What I Need From You: Stakeholder involvement table filtered to next 30 days. Sign-off gates highlighted with a gate tag. Past events hidden. Shows empty-state message when none upcoming.\n5. Key Dates: Milestone table with target dates, notes, and status indicators. Past milestones with strikethrough and reduced opacity.\n6. Project Timeline (Gantt): Interactive horizontal bar chart grouped by Asana sections in correct order. Month header grid, color-coded bars by status, progress fill based on % Done, expandable subtask drill-down, TODAY marker overlay, hover tooltips, diamond milestone markers for tasks without start dates.\n7. Two-column bottom row: Due This Week (tasks due Mon-Sun with TODAY and OVERDUE flags) and In Progress (On Track tasks plus Potential Delays subsection for Not Started tasks past their start date).\n\nStyling rules:\n• Use brand colors: primary for header gradient and accents, secondary for highlights and section backgrounds\n• All Project Timeline text must be black (#000000)\n• Status badge and progress bar should have thin white border for contrast against header\n• Responsive two-column layout that collapses to single column on mobile\n• Clean card-based design with subtle borders and shadows\n\nData handling:\n• All data comes from a DASHBOARD_DATA global variable injected at build time\n• Template uses var DASHBOARD_DATA = /*__DASHBOARD_DATA__*/null; as placeholder\n• Key Dates and Stakeholder Events are hardcoded arrays (not fetched from Asana)\n• parseTask() function must map custom field names to the correct fields identified in Step 2\n• Section ordering must use a hardcoded GID array matching the project\'s actual section order\n• Subtask expansion reads from a pre-fetched subtaskMap object — no API calls at view time\n\nbuild.js requirements:\n• Fetch project metadata, all tasks (with pagination), and pre-fetch all subtask details\n• Use the Asana REST API (https://app.asana.com/api/1.0)\n• Auth via ASANA_TOKEN environment variable (Bearer token)\n• Replace /*__DASHBOARD_DATA__*/null in template.html with the JSON data blob\n• Output to dist/index.html\n\ndeploy.yml requirements:\n• Triggers: schedule (cron every 30 minutes), push to main, workflow_dispatch\n• Set FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true as a top-level env var\n• Use Node.js 22\n• Deploy using GitHub Pages actions (configure-pages, upload-pages-artifact, deploy-pages)\n• Permissions: contents: read, pages: write, id-token: write\n\nREADME.md requirements:\nWrite detailed, beginner-friendly setup instructions assuming no prior GitHub experience. Include:\n• Prerequisites (GitHub account, GitHub Desktop, Asana token)\n• Step-by-step: create repo, generate Asana token, upload files via GitHub Desktop (with note about hidden .github folder), add ASANA_TOKEN secret, enable GitHub Pages, trigger first build, find the dashboard URL\n• Troubleshooting: common errors (missing token, build failures)\n• How to change refresh frequency\n• Note about public vs. private repo implications for sharing\n\nStep 4: Deliver\nSave all files to the outputs folder and present them to me using present_files. Provide the folder structure so I can push it to GitHub.'}]}
+]},
+
+// ── PHASE 3: DESIGN ──
+{n:'03',name:'Design',rte:{title:'Review, Test, and Evaluate',desc:'Multiple quality gates occur during Design. Deliverables are peer/SME reviewed, stakeholder-approved, and confirmed aligned to objectives before advancing.'},items:[
+{name:'Develop Assessments',ic:'checkmark',t:'process',desc:'Design assessment instruments that directly measure learner achievement of each objective. Includes knowledge checks, performance assessments, pre/post tests, and rubrics.',subs:['Create items aligned to each objective','Develop rubrics and scoring criteria','Design formative assessments (knowledge checks)','Design summative assessments (final tests)','Write clear instructions and feedback'],tools:[{n:'Course Design Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQDQM4kZvKQUSZ8lJ7qdHoOpAURMpoTA4e5018Ie7YrBIy8?e=fQ7F0H'}],del:['Course Design (partially complete)'],ai:[{ref:'Assessment Item Generator',prompt:'Create assessment items for these objectives: [list]. For each: 1 scenario-based, 1 multiple-choice, 1 performance task. Include answer keys.'},{ref:'Rubric Designer',prompt:'Design a rubric for [task]. Include criteria, 4-point scale, detailed descriptions per level.'},{ref:'Assessment Ideas Generator',prompt:'Generate creative and effective assessment ideas for the following course. For each learning objective, suggest at least two assessment types (e.g., scenario-based, multiple choice, performance task, drag-and-drop, matching, simulation, case study, reflection).\n\nFor each assessment idea, include:\n• Assessment type and format\n• Brief description of the activity\n• Which objective it measures\n• Bloom\'s Taxonomy level targeted\n• Estimated learner time\n\nIf the instructional goal and learning objectives are not provided below, ask me to provide them before generating ideas.\n\nInstructional Goal: [paste your instructional goal]\nLearning Objectives: [paste your learning objectives]'}]},
+
+{name:'Design Instructional Strategy',ic:'puzzle',t:'process',desc:'Define the overall instructional approach — sequencing, delivery methods, engagement strategies, practice design, chunking, and pacing. Ensures the experience is pedagogically sound.',subs:['Select strategies aligned with objective types','Define content sequencing and scaffolding','Design practice and feedback mechanisms','Plan engagement and motivation strategies','Determine chunking and pacing for modality'],tools:[{n:'Course Design Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQDQM4kZvKQUSZ8lJ7qdHoOpAURMpoTA4e5018Ie7YrBIy8?e=fQ7F0H'}],del:['Course Design (partially complete)'],ai:[{ref:'Strategy Architect',prompt:'Design an instructional strategy for [topic] for [audience]. Objectives: [list]. Recommend sequencing, practice, engagement, chunking. Justify each.'},{ref:'Strategy Comparison',prompt:'Suggest three instructional strategy approaches and compare strengths for my audience: [details]'}]},
+
+{name:'Define Metrics for Evaluation',ic:'barchart',t:'process',desc:'Establish the evaluation framework with specific metrics to measure training effectiveness at multiple Kirkpatrick levels (reaction, learning, behavior, results).',subs:['Define Level 1 (Reaction) metrics','Define Level 2 (Learning) metrics','Define Level 3 (Behavior) metrics','Define Level 4 (Results) metrics','Establish data collection methods per level'],tools:[{n:'Formative Evaluation Plan Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQCF7huxTI-fSIxmzVtWKUwbAdbscBKsV6nh1ZEY0IqLEAg?e=nWNAGv'},{n:'Course Design Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQDQM4kZvKQUSZ8lJ7qdHoOpAURMpoTA4e5018Ie7YrBIy8?e=fQ7F0H'}],del:['Course Design (partially complete)','Formative Evaluation Plan'],ai:[{ref:'Evaluation Framework Builder',prompt:'Complete the attached Formative Evaluation Plan. Design an evaluation framework using Kirkpatrick\'s Four Levels for [topic]. Define metrics, collection methods, timeline, and responsible parties per level.'},{ref:'L1 Survey Designer',prompt:'Create a Level 1 (reaction) survey for an eLearning course on [topic]. Mix Likert scales and open-ended questions.'}]},
+
+{name:'Draw Adaptive Learning Paths',ic:'fork',t:'process',desc:'Design branching or adaptive pathways that personalize the learner experience based on pre-assessment results, role, or in-course performance.',subs:['Define learner segments or personas','Map content paths for each segment','Design branching logic based on assessment','Create remediation paths for struggling learners','Plan acceleration paths for advanced learners'],tools:[{n:'Miro',link:'https://www.miro.com'}],del:['Course Design (partially complete)'],ai:[{ref:'Adaptive Path Designer',prompt:'Design adaptive learning paths for [topic]. Three audience segments: [describe]. Map personalized paths with branching, remediation, and acceleration.'},{ref:'Pre-Assessment Branching Logic',prompt:'Create a decision tree for adaptive branching after a pre-assessment. Define score thresholds and content differences.'}]},
+
+{name:'Course Design/Storyboard',ic:'film',t:'gate',signoff:true,desc:'Create the detailed, screen-by-screen blueprint of the learning experience. Maps content, interactions, assessments, media, and navigation for each module. Serves as the development blueprint.',subs:['Organize content into modules, lessons, screens','Write on-screen text, narration, interaction descriptions','Specify media requirements','Map interactions, practice, branching logic','Include assessment items per objective','Apply Gagné\'s 9 Events as framework'],tools:[{n:'Course Design Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQDQM4kZvKQUSZ8lJ7qdHoOpAURMpoTA4e5018Ie7YrBIy8?e=fQ7F0H'},{n:'Storyboard Template'}],del:['Course Design (completed)','Storyboard (completed)'],ai:[{ref:'Storyboard Builder',prompt:'Create a storyboard outline for a module on [topic]. Per screen: title, text, narration, interaction, media, objective addressed. Use Gagné\'s 9 Events.'},{ref:'Voiceover Script Writer',prompt:'Generate a voiceover script as a Word document (.docx) using the following table format:\n\nColumns: No. | Scene Description | Voiceover Script | Visuals\n\nFor each scene/screen, provide:\n• No.: Sequential scene number\n• Scene Description: Brief description of what is happening on screen\n• Voiceover Script: The exact narration text to be recorded\n• Visuals: Description of on-screen graphics, animations, or text that accompany the narration\n\nGuidelines:\n• Write in a conversational, professional tone unless otherwise specified\n• Keep each scene\'s narration to 30-60 seconds (approximately 75-150 words)\n• Ensure narration complements rather than duplicates on-screen text\n• Include transition cues between scenes\n\nCourse Topic: [describe your course topic]\nTone/Style: [conversational, formal, friendly, etc.]\nStoryboard/Content: [paste your storyboard or course outline]'}]},
+
+{name:'Course Design/Storyboard + Project Schedule/Timeline Review and Sign-off Meeting',ic:'handshake',t:'milestone',meeting:true,desc:'Stakeholder and SME review meeting to walk through the completed course design/storyboard and project schedule. Ensures content accuracy, instructional approach, and timeline are approved before development begins.',subs:['Distribute course design/storyboard and project schedule in advance','Walk through course structure, content flow, and interactions','Review assessment strategy and alignment to objectives','Review project schedule, milestones, and dependencies','Collect feedback and obtain formal sign-off to proceed to development'],tools:[],del:['Signed Course Design/Storyboard','Approved Project Schedule','Meeting Notes with Feedback and Decisions'],ai:[{ref:'Storyboard Review Meeting Agenda',prompt:'Create an agenda for a course design/storyboard and project schedule review meeting. The course is: [describe]. Include sections for walking through the storyboard, reviewing assessments, discussing the project timeline, and collecting sign-off.'},{ref:'Review Sign-off Email',prompt:'Draft a post-meeting email confirming course design/storyboard and project schedule sign-off with key feedback incorporated: [paste meeting notes]'},{ref:'Course Design/Storyboard + Project Schedule/Timeline Review and Sign-off Meeting Invite',prompt:'Generate a calendar invite for a Course Design/Storyboard and Project Schedule/Timeline Review and Sign-off Meeting. Write in a friendly, warm, concise, and professional tone.\n\nInclude:\n1. A brief message summarizing the purpose of the meeting and the expected outcome\n2. A high-level, non-timed meeting agenda\n\nPurpose: Walk through the completed course design/storyboard and project schedule to validate content, instructional approach, and timeline before development begins.\nDesired Outcome: Approved course design/storyboard and project schedule with formal sign-off to proceed to development.\n\nProject Summary: [attach or paste your Project Summary]'},{ref:'Course Design/Storyboard + Project Schedule/Timeline Review and Sign-off Meeting Pre-Read',prompt:'Generate a Pre-Read document as a Word document (.docx) for stakeholders attending the Course Design/Storyboard and Project Schedule/Timeline Review and Sign-off Meeting.\n\nUsing the attached Course Design/Storyboard and Project Summary, create a concise stakeholder-ready document that:\n• Summarizes the course structure, modules, and content flow\n• Highlights the instructional strategy, engagement approach, and assessment design\n• Outlines the project schedule with key milestones and dependencies\n• Identifies areas where stakeholder or SME input is needed\n• Lists specific questions or items requiring stakeholder feedback during the meeting\n\nKeep it brief and scannable — stakeholders should be able to review this in 10-15 minutes so they come prepared to discuss and sign off.\n\nCourse Design/Storyboard: [attach or paste your Course Design/Storyboard]\nProject Summary: [attach or paste your Project Summary]'}]},
+
+{name:'Formative Evaluation Plan',ic:'flask',t:'gate',signoff:true,desc:'Plan how the course will be evaluated during development through one-to-one reviews, small-group trials, and expert reviews. Catches problems early.',subs:['Define evaluation stages (one-to-one, small group, field trial)','Identify evaluators per stage','Create evaluation instruments and checklists','Establish timelines per round','Define revision criteria and thresholds'],tools:[{n:'Formative Evaluation Plan Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQCF7huxTI-fSIxmzVtWKUwbAdbscBKsV6nh1ZEY0IqLEAg?e=nWNAGv'}],del:['Formative Evaluation Plan'],ai:[{ref:'Formative Eval Planner',prompt:'Complete the attached Formative Evaluation Template. Create a formative evaluation plan for [topic] eLearning. Three stages: one-to-one, small-group ([N] learners), field trial. Define purpose, participants, data collection, revision criteria.'},{ref:'One-to-One Protocol Designer',prompt:'Design a one-to-one evaluation protocol. Include think-aloud instructions, observation checklist, post-session interview questions.'},{ref:'Formative Evaluation Review',prompt:'Review the attached Formative Evaluation Plan for quality and effectiveness. Evaluate against both Kirkpatrick\'s Four Levels of Evaluation and Phillips\' ROI Methodology.\n\nAssess the following:\n• Are evaluation stages clearly defined (one-to-one, small group, field trial)?\n• Are appropriate data collection methods specified per stage?\n• Are evaluation instruments aligned with learning objectives?\n• Does the plan address all four Kirkpatrick levels (Reaction, Learning, Behavior, Results)?\n• Does the plan consider Phillips\' Level 5 (ROI) where applicable?\n• Are revision criteria and thresholds clearly defined?\n• Are evaluator roles and timelines realistic?\n• Are there gaps in what is being measured?\n\nProvide specific feedback on strengths, weaknesses, and recommended improvements for each section.\n\nFormative Evaluation Plan: [attach or paste your plan]'}]},
+
+{name:'Formative Evaluation Plan Review and Sign-off Meeting',ic:'handshake',t:'milestone',meeting:true,desc:'Meeting with stakeholders to review the Formative Evaluation Plan, confirm evaluation stages, participants, instruments, and revision criteria, and obtain sign-off before beginning formative evaluation activities.',subs:['Distribute Formative Evaluation Plan in advance','Present evaluation stages and methodology','Review evaluation instruments and checklists','Confirm evaluator assignments and timelines','Obtain formal sign-off on the plan'],tools:[],del:['Signed Formative Evaluation Plan','Meeting Notes with Decisions'],ai:[{ref:'Formative Eval Review Agenda',prompt:'Create an agenda for a Formative Evaluation Plan review and sign-off meeting. The plan covers: [describe evaluation approach]. Include sections for reviewing each evaluation stage, instruments, and timeline.'},{ref:'Eval Plan Sign-off Email',prompt:'Draft a post-meeting email confirming Formative Evaluation Plan sign-off and summarizing evaluation stages and timeline: [paste meeting notes]'},{ref:'Formative Evaluation Plan Review and Sign-off Meeting Invite',prompt:'Generate a calendar invite for a Formative Evaluation Plan Review and Sign-off Meeting. Write in a friendly, warm, concise, and professional tone.\n\nInclude:\n1. A brief message summarizing the purpose of the meeting and the expected outcome\n2. A high-level, non-timed meeting agenda\n\nPurpose: Review the Formative Evaluation Plan — including evaluation stages, participants, instruments, and revision criteria — and obtain formal sign-off before beginning formative evaluation activities.\nDesired Outcome: Approved Formative Evaluation Plan with sign-off to proceed with evaluation.\n\nProject Summary: [attach or paste your Project Summary]'},{ref:'Formative Evaluation Plan Review and Sign-off Meeting Pre-Read',prompt:'Generate a Pre-Read document as a Word document (.docx) for stakeholders attending the Formative Evaluation Plan Review and Sign-off Meeting.\n\nUsing the attached Formative Evaluation Plan and Project Summary, create a concise stakeholder-ready document that:\n• Summarizes the evaluation approach and methodology\n• Highlights each evaluation stage (one-to-one, small group, field trial) with participants and timeline\n• Outlines the evaluation instruments and data collection methods\n• Identifies revision criteria and decision thresholds\n• Lists specific questions or items requiring stakeholder input during the meeting\n\nKeep it brief and scannable — stakeholders should be able to review this in 10-15 minutes so they come prepared to discuss and sign off.\n\nFormative Evaluation Plan: [attach or paste your Formative Evaluation Plan]\nProject Summary: [attach or paste your Project Summary]'}]}
+]},
+
+// ── PHASE 4: DEVELOPMENT ──
+{n:'04',name:'Development',rte:{title:'Review, Test, and Evaluate',desc:'Development entry and exit gates. Confirm all design deliverables are complete before starting, and verify the built course is ready for testing before advancing.'},items:[
+{name:'SME Interviews for Content Deep Dives',ic:'people',t:'milestone',meeting:true,desc:'Structured interviews with subject matter experts to gather detailed, accurate content for course development. Focuses on extracting expert knowledge, real-world scenarios, common misconceptions, and edge cases that inform the learning experience.',subs:['Identify SMEs by content area and schedule interviews','Prepare interview guides with targeted questions per topic','Conduct interviews and record (with permission)','Document key content, examples, and scenarios','Validate captured content with SMEs for accuracy'],tools:[],del:['SME Interview Notes','Content Detail Documentation','Validated Content for Development'],ai:[{ref:'SME Interview Guide',prompt:'Create an SME interview guide for a course on [topic]. Include questions that extract: key concepts, common mistakes, real-world scenarios, decision-making processes, and expert tips. Format as a structured interview protocol.'},{ref:'Interview Notes Synthesizer',prompt:'Synthesize these SME interview notes into organized content documentation ready for course development. Group by topic, flag contradictions, and highlight key examples: [paste notes]'},{ref:'SME Interviews for Content Deep Dives Invite',prompt:'Generate a calendar invite for an SME Interview for Content Deep Dives. Write in a friendly, warm, concise, and professional tone.\n\nInclude:\n1. A brief message summarizing the purpose of the interview and the expected outcome\n2. A high-level, non-timed agenda for the interview session\n\nPurpose: Conduct a structured interview to gather detailed content, real-world scenarios, common misconceptions, and edge cases from this subject matter expert for course development.\nDesired Outcome: Documented expert knowledge, validated examples, and accurate content ready for course development.\n\nProject Summary: [attach or paste your Project Summary]\nSME topic area: [describe the specific content area this SME will cover]'}]},
+
+{name:'Develop Instructional Materials',ic:'build',t:'process',desc:'The core production phase — build all content, interactions, assessments, and multimedia in the authoring tool. Typically the longest and most resource-intensive phase.',subs:['Build course structure and navigation','Develop on-screen content and interactions','Write scripts and produce voiceover','Develop activities and practice exercises','Write assessment feedback','Produce and integrate multimedia','Apply accessibility and UDL principles','Design navigation and UI elements','Conduct internal quality checks'],tools:[{n:'Revision Tracker (ID) Template',link:'https://1drv.ms/x/c/cc839e3a35a19644/IQA8zFpo6FRbTImehefPhfNHAQMH9ebrumBz2FW2GKJRGfo?e=NBU1l5'},{n:'Revision Tracker (SME) Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQBviO08KbOKS5k2b5XgVk4_AVW2SHYobTrX0tNiI8e5fZQ?e=cPIyNn'},{n:'Adobe Creative Cloud',link:'https://www.adobe.com/creativecloud.html'},{n:'Articulate 360',link:'https://id.articulate.com/redirect/login'},{n:'ChatGPT',link:'https://chatgpt.com'},{n:'Claude AI',link:'https://claude.ai'},{n:'ElevenLabs',link:'https://elevenlabs.io'},{n:'Envato',link:'https://www.envato.com'},{n:'GitHub',link:'https://github.com'},{n:'Synthesia',link:'https://www.synthesia.io'},{n:'TinyPNG',link:'https://tinypng.com'}],del:['Developed eLearning course files','All multimedia assets','Narration audio files','Interaction source files'],ai:[{ref:'Scenario Interaction Builder',prompt:'Create a scenario-based branching interaction for [skill]. Include setup, 3 decision points, consequences, feedback.'},{ref:'Accessibility Description Generator',prompt:'Generate alt text and accessibility descriptions for these screens (WCAG 2.1 AA): [describe visuals]'},{ref:'eLearning Quality Review',prompt:'Conduct a comprehensive quality review of the attached eLearning course materials. Evaluate against these 9 categories:\\n\\n1. ACTIVITIES & ASSESSMENTS — Instructions, functionality, grading, feedback\\n2. AGENTS — Politeness, cultural fit, design simplicity, feedback styles\\n3. AUDIO — Playback quality, consistency, closed captioning, sync\\n4. GRAMMAR & WRITING — Correctness, acronyms, capitalization, formatting, procedures\\n5. GRAPHICS & MULTIMEDIA — Image clarity, icon consistency, compression, alt text, color contrast\\n6. USER INTERFACE DESIGN — Button/hyperlink/table/text formatting consistency, accessibility compliance\\n7. FUNCTIONALITY — Button/hyperlink behavior, navigation, slide transitions, pause capability, downloads\\n8. CONTENT ORGANIZATION — Lesson order, titles, navigation instructions, concluding slide\\n9. FILE & EXPORT — Menu/site map completeness, playback speed adjustment\\n\\nFor each category, identify specific issues found, rate overall quality (Pass, Needs Revision, Fail), and provide actionable fix recommendations.\\n\\nCourse Materials: [attach or describe the eLearning content to review]'}]},
+
+{name:'Conduct Alpha "Wireframe" Testing',ic:'beaker',t:'process',desc:'Internal testing of the near-final build to identify functional issues, content errors, and usability problems before SME review. Focuses on technical functionality and UX.',subs:['Define alpha test plan and test cases','Recruit internal testers','Execute tests across target platforms','Document bugs, issues, enhancement requests','Address critical issues before beta'],tools:[{n:'eLearning Quality Checklist',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQDrVidfN3x6RYVa8cp0fG9KAawVhAVDjyk7fOUxDQjxrrQ?e=k1l2jO'}],del:['Alpha test report','Bug/issue log','Revised course build'],ai:[{ref:'Alpha Test Case Generator',prompt:'Create alpha test cases for an eLearning course. Cover: navigation, interactions, scoring, branching, media, SCORM/xAPI tracking, accessibility. Format as spreadsheet.'}]},
+
+{name:'Conduct Beta (SME + Stakeholder) Testing',ic:'eye',t:'process',desc:'Formal review by SMEs and stakeholders to validate content accuracy, relevance, and business alignment. This is the content sign-off stage.',subs:['Distribute course with review guidelines','Provide SME review checklist','Collect and consolidate feedback','Conduct stakeholder walkthrough','Implement revisions','Obtain formal sign-off'],tools:[],del:['SME review feedback log','Revised course build'],ai:[{ref:'SME Review Request Email',prompt:'Draft an email to SMEs requesting course review. Include focus areas, feedback method, deadline, checklist link.'},{ref:'Feedback Prioritizer',prompt:'Consolidate and prioritize this SME feedback. Categorize as: critical, important, nice-to-have: [paste feedback]'}]}
+]},
+
+// ── PHASE 5: IMPLEMENTATION ──
+{n:'05',name:'Implementation',rte:{title:'Review, Test, and Evaluate',desc:'Post-launch gate. Confirm successful deployment, verify evaluation instruments are in place, and review initial learner data for issues before transitioning to formal evaluation.'},items:[
+{name:'Publish Course to LMS',ic:'cloud',t:'process',desc:'Package and deploy the finalized course to the LMS. Configure enrollment, tracking, reporting, and completion criteria.',subs:['Export in required format (SCORM, xAPI, cmi5)','Upload and configure in LMS','Set enrollment rules and availability dates','Configure completion criteria and certificates','Set up reporting dashboards'],tools:[],del:['Published course in LMS','Enrollment plan'],ai:[{ref:'LMS Publishing Checklist',prompt:'Create a SCORM/xAPI publishing checklist for [LMS name]. Include pre-upload, configuration, and post-upload verification.'},{ref:'Course Launch Email',prompt:'Draft a course launch email for [audience]. Include: what, why, how to access, deadline, time estimate, support contact.'}]},
+
+{name:'Conduct Final QA',ic:'lock',t:'gate',signoff:true,desc:'Final quality assurance in the production environment. Verify tracking, scoring, completion, and reporting all function correctly in the real LMS.',subs:['Test complete flow in production LMS','Verify SCORM/xAPI tracking','Test completion and certificate triggers','Verify reporting accuracy','Test across browsers and devices','Final accessibility audit'],tools:[],del:['Final QA test report','Tracking verification results','Go-live approval'],ai:[{ref:'Production QA Test Plan',prompt:'Create a final QA test plan for production LMS. Cover: SCORM tracking, completion, scores, bookmarking, certificates, cross-platform compatibility.'}]},
+
+{name:'Launch Meeting',ic:'rocket',t:'milestone',meeting:true,desc:'Internal coordination meeting with stakeholders, support teams, and communications to finalize launch logistics, confirm readiness, and align on the go-live plan for the training rollout.',subs:['Confirm course is published and QA-verified in LMS','Review launch communication plan and timeline','Brief help desk and support teams','Confirm enrollment lists and notifications are ready','Align on monitoring plan for launch day and first week'],tools:[],del:['Launch Readiness Checklist','Launch Meeting Notes'],ai:[{ref:'Launch Meeting Agenda',prompt:'Create an agenda for a training launch coordination meeting. The course is: [describe]. Include sections for LMS readiness, communications plan, support team briefing, and day-one monitoring.'},{ref:'Launch Readiness Checklist Generator',prompt:'Create a launch readiness checklist covering: LMS configuration, enrollment, communications, support briefing, monitoring plan, and escalation contacts for [topic] training.'},{ref:'Launch Meeting Invite',prompt:'Generate a calendar invite for a Launch Meeting. Write in a friendly, warm, concise, and professional tone.\n\nInclude:\n1. A brief message summarizing the purpose of the meeting and the expected outcome\n2. A high-level, non-timed meeting agenda\n\nPurpose: Finalize launch logistics, confirm readiness across all teams, and align on the go-live plan for the training rollout.\nDesired Outcome: Confirmed launch readiness with all teams aligned on responsibilities, timeline, and escalation plan for launch day and the first week.\n\nProject Summary: [attach or paste your Project Summary]'}]},
+
+{name:'Launch Training',ic:'star',t:'milestone',desc:'Formal organization-wide launch. Includes communication campaigns, enrollment notifications, and support readiness.',subs:['Execute launch communication plan','Send enrollment notifications','Brief help desk/support team','Monitor initial activity','Address day-one issues quickly'],tools:[],del:['Launch communications (sent)','Enrollment confirmation'],ai:[{ref:'Multi-Channel Launch Plan',prompt:'Create a multi-channel launch plan for [topic] training. Include: email, manager talking points, intranet post, Slack message. Audience: [describe].'},{ref:'Launch Day Email',prompt:'Write a launch day email for mandatory training. Include: coverage, importance, access link, deadline, time estimate.'}]}
+]},
+
+// ── PHASE 6: EVALUATION ──
+{n:'06',name:'Evaluation',rte:{title:'Review, Test, and Evaluate',desc:'Final quality gate before project closure. Verify all evaluation is complete, revisions implemented, and project ready to close.'},items:[
+{name:'Summative Evaluation Plan',ic:'piechart',t:'gate',signoff:true,desc:'Comprehensive evaluation using the metrics defined in Design. Analyze data across Kirkpatrick levels to determine if training achieved its objectives and impacted business performance.',subs:['Collect/analyze Level 1 (Reaction) data','Collect/analyze Level 2 (Learning) data','Plan/execute Level 3 (Behavior) collection','Analyze Level 4 (Results) data','Compile evaluation report','Present findings to stakeholders'],tools:[{n:'Summative Evaluation Plan Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQCusjSwSs9DTKI-2xz7XAkEAb0a5B6Wiik88mn2c_0P2gM?e=3buQU1'}],del:['Summative Evaluation Plan','Data analysis results','Stakeholder presentation'],ai:[{ref:'Training Data Analyst',prompt:'Analyze this training evaluation data and identify trends, strengths, areas for improvement: [paste data]. Provide Kirkpatrick-level recommendations.'},{ref:'Stakeholder Evaluation Presentation',prompt:'Generate a stakeholder presentation that communicates the results of the summative evaluation. The presentation should include:\n\n• Title slide with project name, date, and presenter\n• Executive summary of training objectives and scope\n• Evaluation methodology and data sources\n• Results by Kirkpatrick level (L1: Reaction, L2: Learning, L3: Behavior, L4: Results)\n• Key findings — strengths and areas for improvement\n• Data visualizations (charts/tables for completion rates, assessment scores, survey results)\n• ROI analysis (if applicable)\n• Recommendations and next steps\n• Appendix with detailed data\n\nFormat the output as a slide-by-slide outline with speaker notes for each slide.\n\nYou must provide the Summative Evaluation Plan/Report to generate this presentation. If not provided, ask for it before proceeding.\n\nSummative Evaluation Report: [attach or paste your evaluation report]'}]},
+
+{name:'Summative Evaluation Plan Review and Sign-off Meeting',ic:'handshake',t:'milestone',meeting:true,desc:'Meeting with stakeholders to review the Summative Evaluation Plan, confirm evaluation metrics across Kirkpatrick levels, data collection methods, and timeline, and obtain sign-off before executing the evaluation.',subs:['Distribute Summative Evaluation Plan in advance','Present evaluation framework and Kirkpatrick-level metrics','Review data collection methods and responsible parties','Confirm evaluation timeline and reporting schedule','Obtain formal sign-off on the plan'],tools:[],del:['Signed Summative Evaluation Plan','Meeting Notes with Decisions'],ai:[{ref:'Summative Eval Review Agenda',prompt:'Create an agenda for a Summative Evaluation Plan review and sign-off meeting. The plan covers: [describe evaluation approach]. Include sections for reviewing metrics at each Kirkpatrick level, data collection methods, and reporting timeline.'},{ref:'Eval Plan Sign-off Confirmation',prompt:'Draft a post-meeting email confirming Summative Evaluation Plan sign-off with evaluation timeline and reporting milestones: [paste meeting notes]'},{ref:'Summative Evaluation Plan Review and Sign-off Meeting Invite',prompt:'Generate a calendar invite for a Summative Evaluation Plan Review and Sign-off Meeting. Write in a friendly, warm, concise, and professional tone.\n\nInclude:\n1. A brief message summarizing the purpose of the meeting and the expected outcome\n2. A high-level, non-timed meeting agenda\n\nPurpose: Review the Summative Evaluation Plan — including evaluation metrics across Kirkpatrick levels, data collection methods, and timeline — and obtain formal sign-off before executing the evaluation.\nDesired Outcome: Approved Summative Evaluation Plan with sign-off to begin evaluation execution.\n\nProject Summary: [attach or paste your Project Summary]'},{ref:'Summative Evaluation Plan Review and Sign-off Meeting Pre-Read',prompt:'Generate a Pre-Read document as a Word document (.docx) for stakeholders attending the Summative Evaluation Plan Review and Sign-off Meeting.\n\nUsing the attached Summative Evaluation Plan and Project Summary, create a concise stakeholder-ready document that:\n• Summarizes the evaluation framework and Kirkpatrick-level metrics\n• Highlights data collection methods and responsible parties\n• Outlines the evaluation timeline and reporting schedule\n• Identifies key metrics and thresholds stakeholders should focus on\n• Lists specific questions or items requiring stakeholder input during the meeting\n\nKeep it brief and scannable — stakeholders should be able to review this in 10-15 minutes so they come prepared to discuss and sign off.\n\nSummative Evaluation Plan: [attach or paste your Summative Evaluation Plan]\nProject Summary: [attach or paste your Project Summary]'}]},
+
+{name:'Revise Training',ic:'refresh',t:'process',desc:'Based on evaluation data, implement revisions to improve the training — content updates, interaction redesigns, assessment refinements, or structural changes.',subs:['Prioritize revisions from evaluation findings','Plan revision scope and timeline','Implement changes','Re-test revised sections','Re-publish updated course','Document changes in revision tracker'],tools:[],del:['Revised course build','Completed revision tracker','Change log'],ai:[{ref:'Revision Priority Planner',prompt:'Create a prioritized revision plan from this feedback. Categorize as: quick wins, medium effort, major redesigns. Include time estimates: [paste feedback].'},{ref:'Content Clarity Rewriter',prompt:'Rewrite this confusing section. Feedback: [paste]. Original: [paste]. Make clearer while maintaining accuracy.'}]}
+]},
+
+// ── PHASE 7: PROJECT CLOSE ──
+{n:'07',name:'Project Close',rte:null,items:[
+{name:'Project Summary',ic:'briefcase',t:'milestone',desc:'Comprehensive document capturing the full project lifecycle — intake to evaluation results. Serves as the official record and reference for future projects.',subs:['Compile project metrics (timeline, budget, scope)','Summarize key decisions and outcomes','Include evaluation results and impact data','Document maintenance recommendations','Archive with all project files'],tools:[{n:'Project Summary Template',link:'https://1drv.ms/w/c/cc839e3a35a19644/IQBlNVHASXyOQ4gTB5q-9CNSAbhlmvVmVaj465Bmrh7hFIg?e=qQDLn3'}],del:['Project Summary','Final metrics report'],ai:[{ref:'Project Summary Drafter',prompt:'Draft a project summary. Project: [describe]. Metrics: [timeline, budget, scope]. Evaluation: [summary]. Include: overview, scope, milestones, outcomes, evaluation, lessons learned, recommendations.'},{ref:'Project Close-Out Presentation',prompt:'Generate a stakeholder presentation that summarizes the results of the completed ISD project and outlines next steps. The presentation should include:\n\n• Title slide with project name, date, and team\n• Project overview and original business problem\n• Scope and deliverables completed\n• Timeline adherence (planned vs. actual)\n• Budget summary (planned vs. actual)\n• Key accomplishments and milestones achieved\n• Training effectiveness summary (evaluation highlights)\n• Lessons learned\n• Next steps and post-launch plan:\n  - 30-day survey: Initial learner feedback and adoption metrics\n  - 60-day survey: Behavior change and knowledge retention\n  - 90-day survey: Business impact and performance improvement\n• Maintenance and ownership transition plan\n• Acknowledgments and team recognition\n\nFormat as a slide-by-slide outline with speaker notes.\n\nProject Summary: [attach or paste your Project Summary document]'}]},
+
+{name:'Close-Out Meeting',ic:'handshake',t:'milestone',meeting:true,desc:'Formal close-out meeting to review outcomes, lessons learned, evaluation results, and recommendations for future iterations.',subs:['Prepare agenda and materials','Present outcomes and evaluation results','Facilitate lessons learned discussion','Document decisions and recommendations','Formally transition ownership'],tools:[],del:['Close-out meeting notes','Lessons learned document'],ai:[{ref:'Close-Out Agenda Builder',prompt:'Create an agenda for an ISD close-out meeting. Include: outcome review, evaluation highlights, lessons learned, ownership transition, future recs. Project: [describe].'},{ref:'Lessons Learned Document',prompt:'Draft a lessons learned document. Went well: [list]. Challenges: [list]. Recommendations: [list].'},{ref:'Close-Out Meeting Invite',prompt:'Generate a calendar invite for a Close-Out Meeting. Write in a friendly, warm, concise, and professional tone.\n\nInclude:\n1. A brief message summarizing the purpose of the meeting and the expected outcome\n2. A high-level, non-timed meeting agenda\n\nPurpose: Review project outcomes, lessons learned, evaluation results, and formally transition ownership of the training to the client or business.\nDesired Outcome: Documented lessons learned, agreed-upon recommendations for future iterations, and formal ownership transition.\n\nProject Summary: [attach or paste your Project Summary]'}]},
+
+{name:'Deliver and Organize All Files',ic:'package',t:'process',desc:'Organize, package, and deliver all project files, assets, and documentation. Ensure everything is labeled, archived, and accessible for future maintenance.',subs:['Organize source files by category','Create file inventory/manifest','Ensure proper naming and versioning','Transfer to designated storage','Verify client can access everything'],tools:[],del:['Organized file package','File manifest/inventory','Transfer confirmation'],ai:[{ref:'File Organization Architect',prompt:'Create a file organization structure and naming convention for an ISD project archive. Folders for: source files, published output, design docs, media, evaluation data, PM files.'},{ref:'File Handoff Email',prompt:'Draft a file handoff email with deliverables, locations, and maintenance instructions.'}]},
+
+{name:'Project Complete',ic:'trophy',t:'milestone',desc:'Formal end of the ISD project. All deliverables handed off, evaluation complete, lessons documented, project officially closed. The training lives on in the learning ecosystem.',subs:['Confirm all close-out activities are complete','Send thank-you to team members','Update project tracking to "Closed"','Celebrate!'],tools:[],del:['Closed project record'],ai:[{ref:'Project Completion Announcement',prompt:'Write a project completion announcement email to the full team and stakeholders. Project: [describe]. Thank the team and highlight accomplishments.'}]}
+]}
 ];
 
-// Map each column to its phase for header sizing
-function getPhase(col) {
-  if (col.id && M[col.id]) return M[col.id].phase;
-  return null;
-}
+// ═══════════════════════════════════════════
+// RENDER ENGINE
+// ═══════════════════════════════════════════
+let activeTab=0,activeSel=null;
+const tabsEl=document.getElementById('tabs'),listEl=document.getElementById('list'),sbEl=document.getElementById('sb'),sbiEl=document.getElementById('sbi'),statsEl=document.getElementById('stats');
 
-// ───────── RENDER ─────────
-function render() {
-  renderNav();
-  renderHeaders();
-  renderGrid();
-}
+// Stats
+const totalMilestones=DATA.reduce((s,p)=>s+p.items.length,0);
+const totalGates=DATA.reduce((s,p)=>s+p.items.filter(m=>m.t==='gate').length,0);
+statsEl.innerHTML=[
+  {v:DATA.length,l:'Phases'},
+  {v:totalMilestones,l:'Milestones'},
+  {v:totalGates,l:'Alignment + Quality Gates'}
+].map(s=>`<div class="stat"><div class="sv">${s.v}</div><div class="sl">${s.l}</div></div>`).join('');
 
-function renderNav() {
-  const nav = document.getElementById('phaseNav');
-  PHASES.forEach(p => {
-    const b = document.createElement('button');
-    b.className = 'phase-btn';
-    b.textContent = p.name;
-    b.onclick = () => {
-      document.querySelectorAll('.phase-btn').forEach(x=>x.classList.remove('active'));
-      b.classList.add('active');
-      const t = document.querySelector(`[data-phase="${p.id}"]`);
-      if (t) t.scrollIntoView({behavior:'smooth',inline:'start',block:'nearest'});
-    };
-    nav.appendChild(b);
+function renderTabs(){
+  tabsEl.innerHTML='';
+  DATA.forEach((p,i)=>{
+    const t=document.createElement('div');
+    t.className='tab'+(i===activeTab?' active':'');
+    t.innerHTML=`<span class="tn">PHASE ${p.n}</span>${p.name}`;
+    t.onclick=()=>{activeTab=i;activeSel=null;renderTabs();renderList();sbEl.className='sidebar';};
+    tabsEl.appendChild(t);
   });
 }
 
-function renderHeaders() {
-  // Calculate widths per phase by counting columns
-  const phaseCols = {};
-  let currentPhase = 'discovery';
-  L.forEach(col => {
-    if (col.t === 'sep') return;
-    const p = col.id && M[col.id] ? M[col.id].phase : currentPhase;
-    if (col.t === 'node' && col.id && M[col.id]) currentPhase = M[col.id].phase;
-    if (!phaseCols[p]) phaseCols[p] = 0;
-    phaseCols[p]++;
+function renderList(){
+  const phase=DATA[activeTab];
+  listEl.innerHTML='';
+  phase.items.forEach((m,i)=>{
+    const c=document.createElement('div');
+    c.className='card'+(activeSel===i?' sel':'');
+    let tags=m.t==='gate'?`<span class="tg gate">GATE</span>`:'';
+    if(m.meeting)tags+=`<span class="tg meeting">MEETING</span>`;
+    if(m.signoff)tags+=`<span class="tg signoff">SIGN-OFF</span>`;
+    if(m.del.length)tags+=`<span class="tg dt">${m.del.length} DELIVERABLE${m.del.length>1?'S':''}</span>`;
+    if(m.ai.length)tags+=`<span class="tg dt">${m.ai.length} AI PROMPT${m.ai.length>1?'S':''}</span>`;
+    c.innerHTML=`<div class="num">${i+1}</div><div class="ic">${ic(m.ic)}</div><div class="info"><div class="nm">${m.name}</div><div class="ds">${m.desc}</div><div class="tgs">${tags}</div></div><div class="arr">›</div>`;
+    c.onclick=()=>{activeSel=i;renderList();showSidebar(phase,m);};
+    listEl.appendChild(c);
   });
-  // Phase headers aligned to specific milestones
-  const row = document.getElementById('phaseHeaders');
-  const PHASE_ALIGN = [
-    {phase:'discovery', startAt:'intake'},
-    {phase:'analysis', startAt:'performance-analysis'},
-    {phase:'design', startAt:'develop-assessments'},
-    {phase:'development', startAt:'develop-materials'},
-    {phase:'implementation', startAt:'publish-lms'},
-    {phase:'evaluation', startAt:'summative-eval'},
-    {phase:'close', startAt:'project-summary'}
-  ];
-
-  // Compute pixel offset of each column
-  const colWidths = L.map(c =>
-    c.t==='arrow' ? (c.phaseBreak?56 : c.wide?50 : 36)
-    : c.shape==='diamond'?90 : c.shape==='star'?105 : 115
-  );
-  const offsets = []; let cum=0;
-  for(let i=0;i<colWidths.length;i++){offsets.push(cum);cum+=colWidths[i];}
-  const totalW = cum;
-
-  // Find pixel start for each phase
-  const starts = PHASE_ALIGN.map(pa=>{
-    const idx = L.findIndex(c=>c.id===pa.startAt);
-    return {...pa, px: idx>=0?offsets[idx]:0};
-  });
-
-  for(let i=0;i<starts.length;i++){
-    const start = starts[i].px;
-    const end = i<starts.length-1 ? starts[i+1].px : totalW;
-    const cell = document.createElement('div');
-    cell.className = 'phase-header-cell';
-    cell.style.width = (end-start)+'px';
-    cell.setAttribute('data-phase', starts[i].phase);
-    const lbl = document.createElement('span'); lbl.className='phase-label';
-    lbl.style.paddingLeft = '0';
-    lbl.textContent = PHASES.find(p=>p.id===starts[i].phase)?.name||'';
-    cell.appendChild(lbl);
-    const d1 = document.createElement('span'); d1.className='phase-dash'; cell.appendChild(d1);
-    row.appendChild(cell);
+  // RTE Banner
+  if(phase.rte){
+    const b=document.createElement('div');
+    b.className='rte-banner';
+    b.innerHTML=`<div class="rte-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="3,7 6,10 11,4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rte-text"><div class="rte-title">${phase.rte.title}</div><div class="rte-desc">${phase.rte.desc}</div></div>`;
+    listEl.appendChild(b);
   }
 }
 
-function renderGrid() {
-  const grid = document.getElementById('flowGrid');
+function showSidebar(phase,m){
+  sbEl.className='sidebar open';
+  var html='<button class="sb-x" onclick="sbEl.className=\'sidebar\';activeSel=null;renderList();">✕</button>';
+  html+='<div class="sb-phase">Phase '+phase.n+' · '+phase.name+'</div>';
+  html+='<div class="sb-title">'+m.name+'</div>';
+  html+='<div class="sb-rule"></div>';
+  html+='<div class="sb-desc">'+m.desc+'</div>';
 
-  L.forEach((col, idx) => {
-    const wrap = document.createElement('div');
-    let cls = 'col';
-    if (col.t === 'arrow') {
-      cls += ' col-arrow';
-      if (col.phaseBreak) cls += ' col-arrow-brk';
-      if (col.wide) cls += ' col-arrow-wide';
-    }
-    wrap.className = cls;
+  // Sub-steps
+  if(m.subs.length){
+    html+='<div class="sb-section"><div class="sb-label">Sub-Steps</div><ol class="sb-list">'+m.subs.map(function(s){return '<li>'+s+'</li>';}).join('')+'</ol></div>';
+  }
 
-    const aboveDiv = document.createElement('div');
-    aboveDiv.className = 'above';
-    const mainDiv = document.createElement('div');
-    mainDiv.className = 'main';
-    const belowDiv = document.createElement('div');
-    belowDiv.className = 'below';
-
-    if (col.t === 'arrow') {
-      // Above: optional RTE circles or vertical stack
-      if (col.above && col.above.length) {
-        col.above.forEach((aid, ai) => {
-          const am = M[aid];
-          if (!am) return;
-          const isGate = aid.startsWith('rte');
-          const isCircleFilled = aid === 'needs-assessment';
-
-          if (ai > 0) {
-            const vl = document.createElement('div');
-            vl.className = 'v-line';
-            vl.style.height = '12px';
-            aboveDiv.appendChild(vl);
-          }
-
-          const nd = document.createElement('div');
-          if (isGate) {
-            // Non-interactive visual marker
-            nd.className = 'n-gate';
-            nd.innerHTML = '<span style="font-size:7px;line-height:1.1">Review,<br>Test, and<br>Evaluate</span>';
-          } else if (isCircleFilled) {
-            nd.className = 'node n-circle-filled';
-            nd.textContent = am.name;
-            nd.setAttribute('data-id', aid);
-            nd.onclick = () => openPanel(aid);
-            nd.onmouseenter = (e) => showTip(e, am.name);
-            nd.onmouseleave = hideTip;
-          } else {
-            nd.className = 'node n-dark';
-            nd.style.width = '110px';
-            nd.style.height = '72px';
-            nd.textContent = am.name;
-            nd.setAttribute('data-id', aid);
-            nd.onclick = () => openPanel(aid);
-            nd.onmouseenter = (e) => showTip(e, am.name);
-            nd.onmouseleave = hideTip;
-          }
-          aboveDiv.appendChild(nd);
-          // Add vertical down-arrow only after RTE gate circles
-          if (isGate) {
-            const vl = document.createElement('div');
-            vl.className = 'v-line-down';
-            aboveDiv.appendChild(vl);
-            const va = document.createElement('div');
-            va.className = 'v-arrow-down';
-            aboveDiv.appendChild(va);
-          }
-        });
-      }
-
-      // Main: horizontal arrow
-      const ar = document.createElement('div');
-      ar.className = 'arrow';
-      const ln = document.createElement('div');
-      ln.className = 'line';
-      ar.appendChild(ln);
-      if (col.label) {
-        const lb = document.createElement('div');
-        lb.className = 'arrow-label';
-        lb.textContent = col.label;
-        ar.appendChild(lb);
-      }
-      mainDiv.appendChild(ar);
-
-    } else if (col.t === 'node') {
-      const m = M[col.id];
-      if (!m) return;
-
-      // Set phase scroll target on first node of each phase
-      if (!document.querySelector(`[data-phase="${m.phase}"]`)) {
-        wrap.setAttribute('data-phase', m.phase);
-      }
-
-      // Main node
-      let nd;
-      if (col.shape === 'diamond') {
-        nd = document.createElement('div');
-        nd.className = 'n-diamond-wrap';
-        const dm = document.createElement('div');
-        dm.className = 'node n-diamond';
-        dm.setAttribute('data-id', col.id);
-        const dt = document.createElement('div');
-        dt.className = 'd-text';
-        dt.textContent = m.name;
-        dm.appendChild(dt);
-        dm.onclick = () => openPanel(col.id);
-        dm.onmouseenter = (e) => showTip(e, m.name);
-        dm.onmouseleave = hideTip;
-        nd.appendChild(dm);
-        mainDiv.appendChild(nd);
-      } else if (col.shape === 'star') {
-        nd = document.createElement('div');
-        nd.className = 'node n-star-wrap';
-        nd.setAttribute('data-id', col.id);
-        nd.innerHTML = '<div class="star-bg"></div><div class="star-text">' + m.name + '</div>';
-        nd.onclick = () => openPanel(col.id);
-        nd.onmouseenter = (e) => showTip(e, m.name);
-        nd.onmouseleave = hideTip;
-        mainDiv.appendChild(nd);
+  // Tools
+  if(m.tools.length){
+    html+='<div class="sb-section"><div class="sb-label">Tools &amp; Templates</div><div>';
+    m.tools.forEach(function(t){
+      if(t.link){
+        html+='<a class="sb-tool" href="'+t.link+'" target="_blank" rel="noopener">'+t.n+'<svg viewBox="0 0 12 12" fill="none"><path d="M4 1h7v7M11 1L5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
       } else {
-        nd = document.createElement('div');
-        nd.className = 'node n-' + col.shape;
-        nd.setAttribute('data-id', col.id);
-        nd.textContent = m.name;
-        nd.onclick = () => openPanel(col.id);
-        nd.onmouseenter = (e) => showTip(e, m.name);
-        nd.onmouseleave = hideTip;
-        mainDiv.appendChild(nd);
+        html+='<span class="sb-tool-nolink">'+t.n+'</span>';
       }
+    });
+    html+='</div></div>';
+  }
 
-      // Below items
-      if (col.below && col.below.length) {
-        // Vertical connector down from main
-        const vd = document.createElement('div');
-        vd.className = 'v-line-down';
-        belowDiv.appendChild(vd);
+  // Deliverables
+  if(m.del.length){
+    html+='<div class="sb-section"><div class="sb-label">Deliverables</div><div>'+m.del.map(function(d){return '<span class="sb-del">'+d+'</span>';}).join('')+'</div></div>';
+  }
 
-        // NO label if this is the decision — taller connector for label padding
-        if (col.shape === 'diamond') {
-          const extraLine = document.createElement('div');
-          extraLine.className = 'v-line-down';
-          extraLine.style.height = '10px';
-          belowDiv.appendChild(extraLine);
-          const nl = document.createElement('div');
-          nl.className = 'branch-no-label';
-          nl.textContent = 'NO';
-          belowDiv.appendChild(nl);
-          const extraLine2 = document.createElement('div');
-          extraLine2.className = 'v-line-down';
-          extraLine2.style.height = '6px';
-          belowDiv.appendChild(extraLine2);
-        }
+  // AI Prompts (accordion)
+  if(m.ai.length){
+    var accId='acc_'+Math.random().toString(36).substr(2,5);
+    html+='<div class="sb-section">';
+    html+='<div class="acc-toggle" onclick="var b=document.getElementById(\''+accId+'\');var c=this.querySelector(\'.acc-chevron\');b.classList.toggle(\'open\');c.classList.toggle(\'open\');">';
+    html+='<div class="sb-label" style="cursor:pointer">AI Prompts ('+m.ai.length+')</div>';
+    html+='<span class="acc-chevron">▼</span></div>';
+    html+='<div class="acc-body" id="'+accId+'">';
+    m.ai.forEach(function(a,idx){
+      var copyId='cp_'+accId+'_'+idx;
+      html+='<div class="ai-card"><button class="ai-copy" id="'+copyId+'" onclick="navigator.clipboard.writeText(document.getElementById(\''+copyId+'_t\').innerText).then(function(){var btn=document.getElementById(\''+copyId+'\');btn.textContent=\'COPIED\';btn.classList.add(\'copied\');setTimeout(function(){btn.textContent=\'COPY\';btn.classList.remove(\'copied\');},1500);})">COPY</button><div class="ai-ref">'+a.ref+'</div><div class="ai-prompt" id="'+copyId+'_t">'+fmtAI(a.prompt)+'</div></div>';
+    });
+    html+='</div></div>';
+  }
 
-        col.below.forEach(bid => {
-          const bm = M[bid];
-          if (!bm) return;
-          const bn = document.createElement('div');
-          if (bid === 'non-training') {
-            bn.className = 'node n-dashed';
-          } else {
-            bn.className = 'node n-dark';
-          }
-          bn.style.width = '108px';
-          bn.style.height = '68px';
-          bn.setAttribute('data-id', bid);
-          bn.textContent = bm.name;
-          bn.onclick = () => openPanel(bid);
-          bn.onmouseenter = (e) => showTip(e, bm.name);
-          bn.onmouseleave = hideTip;
-          belowDiv.appendChild(bn);
-        });
-      }
-    }
-
-    wrap.appendChild(aboveDiv);
-    wrap.appendChild(mainDiv);
-    wrap.appendChild(belowDiv);
-    grid.appendChild(wrap);
-  });
+  sbiEl.innerHTML=html;
 }
 
-// ───────── TOOLTIP ─────────
-function showTip(e, text) {
-  const t = document.getElementById('tip');
-  t.textContent = text;
-  t.classList.add('show');
-  const r = (e.currentTarget || e.target).getBoundingClientRect();
-  t.style.left = Math.max(4, r.left + r.width/2 - t.offsetWidth/2) + 'px';
-  t.style.top = (r.top - t.offsetHeight - 8) + 'px';
-}
-function hideTip() { document.getElementById('tip').classList.remove('show'); }
-
-// ───────── DETAIL PANEL ─────────
-function openPanel(id) {
-  const m = M[id];
-  if (!m) return;
-  document.querySelectorAll('.node').forEach(n=>n.classList.remove('sel'));
-  const el = document.querySelector(`[data-id="${id}"]`);
-  if (el) el.classList.add('sel');
-
-  const phase = PHASES.find(p=>p.id===m.phase);
-  const badge = document.getElementById('pBadge');
-  badge.textContent = phase?.name || '';
-  badge.style.background = (phase?.color||'#ccc') + '25';
-  badge.style.color = phase?.color||'#666';
-  document.getElementById('pTitle').textContent = m.name;
-
-  const body = document.getElementById('pBody');
-  let h = '';
-
-  h += `<div class="p-sec"><div class="p-label"><span class="ic">&#128218;</span> Purpose</div><div class="p-text">${m.desc}</div></div>`;
-
-  if (m.sub?.length) {
-    h += '<div class="p-sec"><div class="p-label"><span class="ic">&#9745;</span> Subtasks</div><ul class="p-list">';
-    m.sub.forEach(s => h += `<li data-ic="&#9642;"><span>${s}</span></li>`);
-    h += '</ul></div>';
-  }
-  if (m.tools?.length) {
-    h += '<div class="p-sec"><div class="p-label"><span class="ic">&#128295;</span> Tools</div><ul class="p-list">';
-    m.tools.forEach(t => { if(t.link) { h += `<li data-ic="&#128736;" style="font-weight:500"><span><a href="${t.link}" target="_blank" style="color:var(--cyan);text-decoration:underline">${t.n}</a></span></li>`; } else { h += `<li data-ic="&#128736;" style="font-weight:500"><span>${t.n}</span></li>`; } });
-    h += '</ul></div>';
-  }
-  if (m.resources?.length) {
-    h += '<div class="p-sec"><div class="p-label"><span class="ic">&#128214;</span> Resources</div><ul class="p-list">';
-    m.resources.forEach(r => h += `<li data-ic="&#128279;"><span>${r.n}</span></li>`);
-    h += '</ul></div>';
-  }
-  if (m.del?.length) {
-    h += '<div class="p-sec"><div class="p-label"><span class="ic">&#128230;</span> Deliverables</div><div>';
-    m.del.forEach(d => h += `<span class="del-tag">${d}</span>`);
-    h += '</div></div>';
-  }
-  if (m.ai?.length) {
-    h += '<div class="p-sec"><div class="p-label"><span class="ic">&#129302;</span> AI Prompts</div>';
-    m.ai.forEach(p => h += `<div class="prompt-card" onclick="copyP(this)">${p}<div class="copy-hint">Click to copy</div></div>`);
-    h += '</div>';
-  }
-  body.innerHTML = h;
-  document.getElementById('panel').classList.add('open');
-  document.getElementById('overlay').classList.add('open');
-}
-
-function closePanel() {
-  document.getElementById('panel').classList.remove('open');
-  document.getElementById('overlay').classList.remove('open');
-  document.querySelectorAll('.node').forEach(n=>n.classList.remove('sel'));
-}
-
-function copyP(el) {
-  const txt = el.textContent.replace('Click to copy','').replace('Copied!','').trim();
-  navigator.clipboard.writeText(txt).then(()=>{
-    el.classList.add('copied');
-    el.querySelector('.copy-hint').textContent='Copied!';
-    setTimeout(()=>{el.classList.remove('copied');el.querySelector('.copy-hint').textContent='Click to copy';},2000);
-  });
-}
-
-document.getElementById('pClose').onclick = closePanel;
-document.getElementById('overlay').onclick = closePanel;
-document.addEventListener('keydown', e => { if (e.key==='Escape') closePanel(); });
-
-// ───────── INIT ─────────
-render();
+renderTabs();
+renderList();
 </script>
 </body>
 </html>
